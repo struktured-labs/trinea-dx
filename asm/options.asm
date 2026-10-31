@@ -146,13 +146,15 @@ sarachk:           ; A8; carry set -> do one extra step this tick. Any hero (was
     SEC
     RTS
 
-!Q = $7ECF80      ; issue #15 second column-DMA slot: +0 pending, +1 VMAIN, +2/3 VRAM addr ($006C), +4..+10 = $085E..$0864
+!Q = $306340      ; battery SRAM (no WRAM byte is safe: stage loads and the overlay's CGRAM save reuse $7ECF80+); +0 = $A7 when pending, +11 = DMA mask. issue #15 second column-DMA slot: +0 pending, +1 VMAIN, +2/3 VRAM addr ($006C), +4..+10 = $085E..$0864
 ryo_pre:          ; A8. Run the game's streamer for the camera after the normal step; if it queued a column, move that
     PHP           ; job to slot !Q (NMI runs it before the game's own job) so the extra step's column can use $0081
     JSL ryo_strm
     SEP #$20
     LDA $0081
     BEQ +
+    STA.l !Q+11
+    LDA #$A7
     STA.l !Q
     LDA $00A9 : STA.l !Q+1
     LDA $006C : STA.l !Q+2
@@ -171,7 +173,9 @@ ryo_pre:          ; A8. Run the game's streamer for the camera after the normal 
 ryo_nmi:          ; replaces SEP #$20 : LDA $0081 at C0:04B6 (NMI column DMA); runs the queued slot first
     SEP #$20
     LDA.l !Q
-    BEQ +
+    CMP #$A7
+    BNE +
+    LDA.l !Q+11
     PHA
     LDA.l !Q+1 : STA $2115
     REP #$20
