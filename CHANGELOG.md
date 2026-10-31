@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fixed: Play Level Easy (Configuration menu) halved the damage YOU dealt and left damage taken unchanged, because the original code at C1:43C3 doubles hero attack on every level except Easy. Easy now deals Normal damage and halves enemy contact/projectile damage to the hero (min 1). Hard still doubles enemy damage, now clamped at 255 instead of wrapping for base values of 128 or more. Normal is unchanged (#13).
 - Fixed: Hero speed barely affected Ryo once the screen scrolled (+6% instead of +25/+50%). His extra 8 px step now streams the skipped BG column/row through a second NMI DMA slot, so fast/faster give ~+29%/+40% in Neo Edo with no garbled columns (#15).
 
 ## v1.1.2 (2026-10-31)
