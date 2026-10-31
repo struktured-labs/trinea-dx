@@ -46,6 +46,13 @@ tick:
     JSR $3431
     JSR chain
 +   RTS
+org $C0FF40        ; free zeros in C0 (help_wait ends at $C0FF36)
+ryo_strm:
+    JSR $2FD8
+    RTL
+org $C004B6
+    JSL ryo_nmi
+    NOP
 org $C031B7
     JSR chain
     JSR tick
@@ -103,16 +110,22 @@ turbo:             ; A8; returns carry = ($082C >= threshold)
 sarachk:           ; A8; carry set -> do one extra step this tick. Any hero (was Sara only): step $0825 is 4 px
     LDA $0825        ; (Sara, Hornisse) or 8 px (Ryo); the extra step is the hero's own step size, so the boost is the
     CMP #$04         ; same +25/+50 % for everyone and the 4/8 px grid alignment and collision chain are unchanged
-    BEQ +
+    BEQ .go
     CMP #$08
     BNE .no
-    LDA $0069        ; Ryo (8 px step): a doubled 8 px step outruns the BG column streamer on scrolling maps
-    CMP.l !W+12      ; (garbled columns), so no extra step while the camera ($0069) moved since the last check
-    STA.l !W+12      ; ($7ECF1C, free; STA keeps Z)
-    BNE .no
-+
+    JSR .gate        ; Ryo: an 8 px step crosses one 8 px BG column/row, so two steps in one tick need two streamed
+    BCC .no          ; columns but the game streams one per tick (C0:2FD8 -> one NMI DMA, C0:04B6). Issue #15: stream
+    JSL ryo_pre      ; the normal step's column now into a second NMI slot (ryo_nmi), then take the extra step
+    SEC
+    RTL
+.go:
+    JSR .gate
+    RTL
+.no: CLC
+    RTL
+.gate:
     LDA $0829
-    BNE .no
+    BNE .n
     JSL getopt
     LSR
     AND #$03
@@ -120,17 +133,63 @@ sarachk:           ; A8; carry set -> do one extra step this tick. Any hero (was
     BEQ .s5
     CMP #$02
     BEQ .s6
-.no: CLC
-    RTL
+.n: CLC
+    RTS
 .s5: LDA $10C2
     AND #$03
-    BNE .no
+    BNE .n
     SEC
-    RTL
+    RTS
 .s6: LDA $10C2
     LSR
-    BCC .no
+    BCC .n
     SEC
+    RTS
+
+!Q = $7ECF80      ; issue #15 second column-DMA slot: +0 pending, +1 VMAIN, +2/3 VRAM addr ($006C), +4..+10 = $085E..$0864
+ryo_pre:          ; A8. Run the game's streamer for the camera after the normal step; if it queued a column, move that
+    PHP           ; job to slot !Q (NMI runs it before the game's own job) so the extra step's column can use $0081
+    JSL ryo_strm
+    SEP #$20
+    LDA $0081
+    BEQ +
+    STA.l !Q
+    LDA $00A9 : STA.l !Q+1
+    LDA $006C : STA.l !Q+2
+    LDA $006D : STA.l !Q+3
+    LDA $085E : STA.l !Q+4
+    LDA $085F : STA.l !Q+5
+    LDA $0860 : STA.l !Q+6
+    LDA $0861 : STA.l !Q+7
+    LDA $0862 : STA.l !Q+8
+    LDA $0863 : STA.l !Q+9
+    LDA $0864 : STA.l !Q+10
+    STZ $0081
++   PLP
+    RTL
+
+ryo_nmi:          ; replaces SEP #$20 : LDA $0081 at C0:04B6 (NMI column DMA); runs the queued slot first
+    SEP #$20
+    LDA.l !Q
+    BEQ +
+    PHA
+    LDA.l !Q+1 : STA $2115
+    REP #$20
+    LDA.l !Q+2
+    CLC
+    ADC #$0800
+    STA $2116
+    LDA.l !Q+6 : STA $4342
+    LDA.l !Q+9 : STA $4345
+    SEP #$20
+    LDA.l !Q+4 : STA $4340
+    LDA.l !Q+5 : STA $4341
+    LDA.l !Q+8 : STA $4344
+    PLA
+    STA $420B
+    LDA #$00
+    STA.l !Q
++   LDA $0081
     RTL
 
 mon:

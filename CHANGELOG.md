@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fixed: Hero speed barely affected Ryo once the screen scrolled (+6% instead of +25/+50%). His extra 8 px step now streams the skipped BG column/row through a second NMI DMA slot, so fast/faster give ~+29%/+40% in Neo Edo with no garbled columns (#15).
+
 ## v1.1.2 (2026-10-31)
 - Fixed: Select controls overlay text shifted sideways / wavy in stages using BG3 horizontal-scroll HDMA (e.g. Neo Edo). Overlay HDMA channel 6 now writes BG3HOFS=0 as well as BG3VOFS on every line (mode 3), so the stage's own scroll HDMA can no longer latch an offset under the page (#12).
 
