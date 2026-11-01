@@ -7,6 +7,8 @@ These moves were checked in play and in the game code.
 - **Gold:** each rotate move costs 10% of your current gold, with a minimum of 10G. You can't use one with less than 10G (C0:836C).
 - **A+B moves are free.**
 
+Spin check (C0:8707): the last four D-pad changes before the button, sampled every 4 frames, must cover all four directions, and each must be held for fewer than N samples: N = 6 for Hornisse and Sara (about 24 frames per direction), N = 2 for Ryo (about 8 frames). So Ryo needs a faster spin than the others, not a slower one; a headless test with 4-way spins succeeded 20/20 at 6-7 frames per direction and 0/20 at 9 or more.
+
 Button tables: C0:894B (Hornisse), C0:88FE (Sara), C0:8998 (Ryo). Each maps a button or combo to an action, and the first match wins. Move names come from watching each move in Mesen.
 
 ## Hornisse
@@ -35,7 +37,7 @@ Button tables: C0:894B (Hornisse), C0:88FE (Sara), C0:8998 (Ryo). Each maps a bu
 ## Ryo
 | Input | Move | Cost |
 |---|---|---|
-| rotate the D-pad (slower rotation), then Y | shadow clones | 10% gold (min 10G) |
+| rotate the D-pad fast (each direction held about 8 frames or less, a full circle in about half a second), then Y | shadow clones | 10% gold (min 10G) |
 | B | sickle (close range) | free |
 | A | chain sickle (thrown on a chain) | free |
 | Y | throwing blade | free |

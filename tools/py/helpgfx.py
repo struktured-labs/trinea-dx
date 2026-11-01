@@ -135,7 +135,7 @@ P={0:('HORNISSE',[('A+B','Morning star'),('Mash B','Sword frenzy'),('Spin D-pad'
       {'X':'Shock wave','B':'Stab','A':'Overhead','Y':'Low sweep'}),
    1:('SARA',[('A+B','Homing flame'),('B+Y','Star fall'),('Spin D-pad','then {B}: Dragon Fire'),('','(costs 10% of gold)'),('X','Giant star (uses 1)')],
       {'X':'Giant star','B':'Fire shot','A':'Spark shot','Y':'Wing spin'}),
-   2:('RYO',[('A+B','Bombs'),('B+Y','Wall of fire'),('Spin D-pad','(slow) then {Y}:'),('','Shadow clones'),('','(costs 10% of gold)'),('X','Petal storm (uses 1)')],
+   2:('RYO',[('A+B','Bombs'),('B+Y','Wall of fire'),('Spin D-pad','(fast) then {Y}:'),('','Shadow clones'),('','(costs 10% of gold)'),('X','Petal storm (uses 1)')],
       {'X':'Petal storm','B':'Sickle','A':'Chain sickle','Y':'Throw blade'})}
 # Held L+R while the overlay is open: the X/A/Y/B labels (map rows 3..10 incl. the hint/header row, columns 18..31, incl. descender rows)
 # are swapped for the DX option each L+R+button toggles (asm/options.asm combo, docs/MOVES.md). Same for everyone.

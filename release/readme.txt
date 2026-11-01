@@ -112,7 +112,7 @@ soft-patching. The patched game is a plain 32 Mbit HiROM with no special chips.
  - Hornisse: A = Overhead, Y = Low sweep; mash B for the sword frenzy;
    A+B morning star; rotate the D-pad then A for lightning.
  - Sara: rotate then B for Dragon Fire; B+Y star fall; A+B homing flame.
- - Ryo: rotate (slower) then Y for shadow clones; B+Y wall of fire;
+ - Ryo: rotate fast then Y for shadow clones; B+Y wall of fire;
    A+B bombs.
 
  Rumble works with RumbleShock-style pads on real hardware and MiSTer.

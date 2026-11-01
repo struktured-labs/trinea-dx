@@ -112,7 +112,7 @@ Editing the translation:
 - **Rotate moves** cost 10% of your gold (min 10G). **A+B moves** are free.
 - **Hornisse:** A/B/Y normals; mash B for the sword frenzy; A+B morning star; rotate the D-pad then A for lightning ("Electric Buffalo").
 - **Sara:** rotate then B for Dragon Fire; B+Y star fall; A+B homing flame.
-- **Ryo:** rotate (slower) then Y for shadow clones; B+Y wall of fire; A+B bombs.
+- **Ryo:** rotate fast then Y for shadow clones; B+Y wall of fire; A+B bombs.
 - **Toggles:** L+R+X turbo, L+R+Y hero speed, L+R+A faster monsters, L+R+B rumble off. Two blinks = on, one = off. All default to off except rumble (L+R+B turns it off). L+R+Select does nothing. L+R+Start is just Start (pause); the Select help overlay is always on.
 - **Select = controls help:** in the field or a stage, Select shows a pad diagram with button actions and the character's moves; Select or Start closes it (see docs/MOVES.md).
 - **Start skips dialogue:** press Start while text is showing to skip the rest of the scene's text; flags, map moves and battles still happen.
