@@ -1,7 +1,7 @@
 # Changelog
 
-## Unreleased
-- Fixed: Play Level Easy (Configuration menu) halved the damage YOU dealt and left damage taken unchanged, because the original code at C1:43C3 doubles hero attack on every level except Easy. Easy now deals Normal damage and halves enemy contact/projectile damage to the hero (min 1). Hard still doubles enemy damage, now clamped at 255 instead of wrapping for base values of 128 or more. Normal is unchanged (#13).
+## v1.1.3 (2026-11-01)
+- Fixed: Play Level Easy (Configuration menu) halved the damage YOU dealt and left damage taken unchanged, because the original code at C1:43C3 doubles hero attack on every level except Easy. Easy now deals Normal damage and halves enemy contact/projectile damage to the hero (min 1). Hard still doubles enemy damage, now clamped at 255 instead of wrapping for base values of 128 or more. Normal is unchanged (#13). The hidden Configuration menu opens with Select on the title screen's CONTINUE/START.
 - Fixed: Ryo's shadow clones were documented as a "slow" spin (Select overlay, README, MOVES). The game (C0:88E0 -> C0:8707) requires a FAST spin for Ryo: each direction held under 2 input samples (~8 frames) vs 6 for Hornisse and Sara. Overlay now reads "Spin D-pad (fast) then Y".
 - Fixed: Hero speed barely affected Ryo once the screen scrolled (+6% instead of +25/+50%). His extra 8 px step now streams the skipped BG column/row through a second NMI DMA slot, so fast/faster give ~+29%/+40% in Neo Edo with no garbled columns (#15).
 

@@ -1,5 +1,5 @@
 ===============================================================================
-                    TRINEA DX v1.1.2 - English Translation + DX
+                    TRINEA DX v1.1.3 - English Translation + DX
                           by struktured labs
 ===============================================================================
 
@@ -7,8 +7,8 @@ Game:          Trinea
 Platform:      Super Nintendo / Super Famicom
 Genre:         Action RPG
 Original:      Yanoman / Japan Art Media (JAM), 1993 (Japan only)
-Patch version: 1.1.2
-Release date:  2026-10-31
+Patch version: 1.1.3
+Release date:  2026-11-01
 Status:        Complete
 Project:       Trinea DX (enhancement project; v1.0 = English translation)
 Source:        https://github.com/struktured/trinea-dx
@@ -38,7 +38,7 @@ the entire game into English:
  - The character select screen, shop descriptions and messages, and the
    money label.
  - A new variable-width dialogue font and additions to the 8x8 small font.
- - DX extras (v1.1.2): less of the original game's slowdown in some
+ - DX extras (v1.1.3): less of the original game's slowdown in some
    scenes, in-game L+R+button toggles (turbo, faster monsters, hero speed,
    rumble off), RumbleShock rumble, a Select controls overlay, Start to
    skip dialogue, and a boot splash. Every toggle can be switched off; the
@@ -62,9 +62,9 @@ Apply the patch to this ROM (No-Intro), headerless:
 After patching:
 
   Size:   4,194,304 bytes (32 Mbit)
-  CRC32:  B1C63C79
-  MD5:    34DC7CF2B2B07A5DEE9E935E333FDA97
-  SHA-1:  D9A22E954353C64F21947253EE8C162AEDE616DF
+  CRC32:  EFCA74A5
+  MD5:    F56777F39FAF9BD73BB3FB5DFA8DDBEB
+  SHA-1:  D1A709055D931AEA6D9CE6392D8C34FEF5142EB1
 
 -------------------------------------------------------------------------------
  3. HOW TO APPLY THE PATCH
@@ -72,7 +72,7 @@ After patching:
  1. Make a backup copy of your ROM and check it against the hashes above.
     If your file is 2,097,664 bytes, it has a copier header. Remove the
     header first.
- 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.1.2].ips" with an IPS
+ 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.1.3].ips" with an IPS
     patcher, for example:
       - Floating IPS (Flips)   https://github.com/Alcaro/Flips
       - ROM Patcher JS (web)   https://www.marcrobledo.com/RomPatcher.js/
@@ -164,6 +164,15 @@ holders.
 -------------------------------------------------------------------------------
  8. CHANGELOG
 -------------------------------------------------------------------------------
+ v1.1.3 (2026-11-01)
+   - Fixed: Play Level Easy (hidden Configuration menu: press Select on
+     CONTINUE/START at the title) was reversed. Easy now deals Normal
+     damage and takes half damage (min 1). Hard still doubles monster
+     damage, now capped at 255. Normal is unchanged (#13).
+   - Fixed: hero speed (L+R+Y) now actually makes Ryo faster once the
+     screen scrolls (#15).
+   - The Select overlay now says Ryo's shadow clones need a fast spin
+     ("Spin D-pad (fast) then Y").
  v1.1.2 (2026-10-31)
    - Fixed: the Select controls overlay text was shifted sideways and
      wrapped in stages that scroll BG3 with HDMA (e.g. Neo Edo). The
