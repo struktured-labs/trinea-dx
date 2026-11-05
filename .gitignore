@@ -17,3 +17,6 @@ __pycache__/
 # release zip is attached to the GitHub Release instead
 /release/*.zip
 build/tests/
+
+tools/libretro/
+
