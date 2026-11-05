@@ -23,7 +23,7 @@ Screenshots: `/workspace/issue16/impl/`
 - Sound Effects + Music Play nested under Sound Test (A toggles SFX↔BGM via `!CFG_MODE=$7ECF32`).
 - L/R on Turbo/Fast foes/Rumble flip bits; Hero Speed cycles Off→Fast→Faster; getopt/setopt + SRAM `$306300` persist.
 - Hooks: max `CMP #$07`; Right/Left at `$D99159`/`$D991CB` (game JMPs there, not `$9158`/`$91CA`); draw `$924D`; confirm `$9097`; D9 stubs for `$9A22`/`$922F`.
-- Sound Test shows SFX/BGM prefix only (no digit via `$9A9B` — blacked out when called from EB path).
+- Sound Test shows SFX/BGM prefix + number via D9 stub → `$9A9B` (restored in follow-up #2).
 - Exit A: brief black then title (same on pristine te-bug); turbo persists across reopen (`cfg_persist_turbo_row.png`).
 - Shots: `cfg_step3_open.png`, `cfg_turbo_on.png`, `cfg_foes_on.png`, `cfg_hero_faster.png`, `cfg_rumble_off.png`, `cfg_stest_*`, `cfg_persist_*`, `cfg_back_title.png`.
 - Commit: `81d1ec5`.
@@ -46,8 +46,11 @@ Screenshots: `/workspace/issue16/impl/`
 - Build md5 (ROM, post-Ryo fix): `a4c753a75057fe51cebd4770bc6828cc`.
 
 ## Follow-ups (pre-Carmelo)
-1. ~~Ryo real-state L/R/L+R~~ Done.
-2. Sound Test number display restore.
+1. ~~Ryo real-state L/R/L+R~~ Done (`943679a`).
+2. ~~Sound Test number display~~ Done.
+   - D9 stub `cfg_jsr_num` → `$9A9B`; digit at `$0638` (after SFX/BGM at `$062C`).
+   - Blank `$0634..$0638` before draw (`$9A9B` skips leading zeros and writes right-to-left; without blank, tens digit goes stale on 0–9).
+   - Verified: SFX15, BGM0, BGM3, back to SFX15. Shots `cfg_stest_num15/bgm0/bgm3/back_sfx.png`.
 3. Full regression savestate suite.
 4. Fresh SRAM defaults + v1.1.3 opts carry-over.
 5. Rebuild IPS/ROM md5s.
@@ -58,7 +61,7 @@ Screenshots: `/workspace/issue16/impl/`
 - Release notes when cutting v1.1.4.
 
 ## Notes
-- Local only; no push / GitHub / rivalmage / OBS.
+- Local only aside from rivalmage deploy (item 6); no push / GitHub / public comments.
 - Headless bsnes-mercury via `tools/py/lr.py` (+ `tools/libretro/` core copy).
 - dp `$20` is not a durable title selection store; use `!TM_SEL`.
 - Always `cp` Japan ROM before asar (asar on already-patched ROM double-applies).

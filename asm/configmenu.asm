@@ -48,6 +48,7 @@ cfg_str_fast:       db "Fast  $"
 cfg_str_faster:     db "Faster$"
 cfg_str_sfx:        db "SFX$"
 cfg_str_bgm:        db "BGM$"
+cfg_str_blank:      db "   $"
 
 cfg_jsr_print:              ; A=id, X=tile, Y=color
     JSR $9A22
@@ -70,13 +71,14 @@ org $D99FAE                 ; id $50
     dw cfg_str_rumble
     dw cfg_str_soundtest
 
-org $D99F8E                 ; id $40..$45 value strings (past music ids)
+org $D99F8E                 ; id $40..$46 value strings (past music ids)
     dw cfg_str_off
     dw cfg_str_on
     dw cfg_str_fast
     dw cfg_str_faster
     dw cfg_str_sfx
     dw cfg_str_bgm
+    dw cfg_str_blank
 
 ; -------------------- EB code --------------------
 org $EB0A00
@@ -188,7 +190,7 @@ cfg_draw:
     LDX #$05AC
     LDY #$0003
     JSL cfg_jsr_print
-    ; Sound Test label + prefix only (skip $9A9B for now)
+    ; Sound Test label + SFX/BGM prefix + number (via D9 stub → $9A9B)
     LDA #$51
     LDX #$060A
     LDY $16B9
@@ -197,6 +199,26 @@ cfg_draw:
     LDX #$062C
     LDY #$0003
     JSL cfg_jsr_print
+    ; number field after prefix (gap so "SFX"/"BGM" stay intact)
+    ; blank $0634..$0638: $9A9B writes right-to-left and skips leading zeros,
+    ; so tens/hundreds tiles go stale unless cleared first
+    SEP #$20
+    LDA #$46                ; blank 3 tiles
+    LDX #$0634
+    LDY #$0003
+    JSL cfg_jsr_print
+    REP #$20
+    LDA.l !CFG_MODE
+    AND #$00FF
+    BNE +
+    LDA.w !CFG_SFX
+    BRA ++
++   LDA.w !CFG_BGM
+++  AND #$00FF
+    LDY #$0003
+    LDX #$0638
+    JSL cfg_jsr_num
+    SEP #$20
     PLY
     PLX
     PLB
