@@ -69,7 +69,9 @@ Screenshots: `/workspace/issue16/impl/`
 5. ~~Rebuild IPS/ROM md5s~~ Done.
    - `build/trinea_dx.ips` md5 `d742041e0d02c399c78b43589bd1364c`
    - `build/trinea_dx.sfc` / `rom/Trinea DX.sfc` md5 `0c0212d18d023426d898c7506010b141`
-6. Deploy NEW file to rivalmage (no launch).
+6. ~~Deploy NEW file to rivalmage (no launch)~~ Done.
+   - Path: `/media/fat/games/SNES/Trinea experiments/Trinea DX issue16 (test).sfc`
+   - Device md5 `0c0212d18d023426d898c7506010b141` (matches build). Existing ROMs/saves untouched; not launched.
 
 ## Next
 - P2 L/R shortcuts (structure noted; not implemented).
