@@ -85,9 +85,11 @@ def page(name,moves,btn,lr=False):
     img[oy:oy+64,ox:ox+128]=a
     # labels right of the pad (x tiles 18..31) at the button heights
     # Rows 4/6/8/10 (row 3 left blank): the row-2 hint/header used to sit directly on top of the X label at row 3.
-    for r,b in ((4,'X'),(6,'A'),(8,'Y'),(10,'B')): rich(18,r,'{%s} %s'%(b,btn[b]),2 if lr else 0)
-    # row 2 above the labels: the L+R hint
-    rich(18,2,'{L+R}: DX opts')   # both views (the L+R view swaps rows 3..10 only; the cyan labels are the options)
+    # issue #16: L/R are per-hero move shortcuts; face buttons keep their own labels
+    lr_l, lr_r = btn.get('L','move 1'), btn.get('R','move 2')
+    rich(18,2,'{L} %s'%lr_l, 2 if lr else 0)
+    rich(18,3,'{R} %s'%lr_r, 2 if lr else 0)
+    for r,b in ((5,'X'),(7,'A'),(9,'Y'),(11,'B')): rich(18,r,'{%s} %s'%(b,btn[b]),2 if lr else 0)
     # SELECT and START: one row, labels mirrored about the pad centre (x 72); a white leader runs from each button
     # straight down out of the pad, then out to the first letter of its label (Select left, Start right).
     rich(1,12,'{SELECT}: help'); rich(16,12,'{START}: pause')   # drops at x 12 / 132: 60 px either side of x 72
@@ -95,7 +97,7 @@ def page(name,moves,btn,lr=False):
         img[oy+47:92+1,bx]=1                           # down from the button to y 92 (row 11)
         img[92,min(bx,lx):max(bx,lx)+1]=1              # across
         img[92:95,lx]=1                                # down to just above the label (row 12)
-    rich(1,14,'{D-pad}: move'); rich(1,15,'{L+R+button}: DX options')
+    rich(1,14,'{L}/{R}: shortcuts'); rich(1,15,'{L+R}: rotate move')
     ctext(17,name+"'S MOVES",1)
     # Moves: packed one per tile row in the map (rows 18..23), then spaced out on screen at pixel level by an
     # HDMA table on BG3 vertical scroll (see help.asm), so no extra tiles are needed: 3 px under the heading,
@@ -132,14 +134,13 @@ def page(name,moves,btn,lr=False):
 # button/combo to an action, names from watching each one in Mesen. B+Y exists only for Sara (star fall) and
 # Ryo (wall of fire); Hornisse's table has no B+Y entry, so B+Y is just his B stab.
 P={0:('HORNISSE',[('A+B','Morning star'),('Mash B','Sword frenzy'),('Spin D-pad','then {A}: Lightning'),('','(costs 10% of gold)'),('X','Shock wave (uses 1)')],
-      {'X':'Shock wave','B':'Stab','A':'Overhead','Y':'Low sweep'}),
+      {'X':'Shock wave','B':'Stab','A':'Overhead','Y':'Low sweep','L':'Sword frenzy','R':'Morning star'}),
    1:('SARA',[('A+B','Homing flame'),('B+Y','Star fall'),('Spin D-pad','then {B}: Dragon Fire'),('','(costs 10% of gold)'),('X','Giant star (uses 1)')],
-      {'X':'Giant star','B':'Fire shot','A':'Spark shot','Y':'Wing spin'}),
+      {'X':'Giant star','B':'Fire shot','A':'Spark shot','Y':'Wing spin','L':'Star fall','R':'Homing flame'}),
    2:('RYO',[('A+B','Bombs'),('B+Y','Wall of fire'),('Spin D-pad','(fast) then {Y}:'),('','Shadow clones'),('','(costs 10% of gold)'),('X','Petal storm (uses 1)')],
-      {'X':'Petal storm','B':'Sickle','A':'Chain sickle','Y':'Throw blade'})}
-# Held L+R while the overlay is open: the X/A/Y/B labels (map rows 3..10 incl. the hint/header row, columns 18..31, incl. descender rows)
-# are swapped for the DX option each L+R+button toggles (asm/options.asm combo, docs/MOVES.md). Same for everyone.
-LR={'X':'Turbo','A':'Fast foes','Y':'Hero speed','B':'Rumble off'}
+      {'X':'Petal storm','B':'Sickle','A':'Chain sickle','Y':'Throw blade','L':'Wall of fire','R':'Bombs'})}
+# issue #16: help_lr.bin kept as a blank stub so help.asm size/layout stays stable; L+R no longer swaps DX opts
+LR={'X':'','A':'','Y':'','B':''}
 LRR,LRC,LRH,LRW=3,18,8,14
 tiles={bytes(16):0}; chr_=bytearray(16); maps=bytearray(); prev=[]; hdma=bytearray()
 def enc(img,pal,ty,tx):
@@ -155,12 +156,9 @@ for k in (0,1,2):
     img,pal,hd=page(*P[k]); hdma+=hd
     Image.fromarray((img*80).astype(np.uint8)).save(GEN+'/help_preview_%d.png'%k)
     if k==0:
-        aimg,apal,_=page(P[0][0],P[0][1],LR,True); lrmap=bytearray()
-        Image.fromarray((aimg*80).astype(np.uint8)).save(GEN+'/help_preview_lr.png')
-        for ty in range(LRR,LRR+LRH):
-            lrmap+=bytes(2*LRC)   # 64-byte rows like help_map, so help.asm uses one stride for both
-            for tx in range(LRC,LRC+LRW): lrmap+=enc(aimg,apal,ty,tx)
-        assert not aimg[(LRR+LRH)*8:(LRR+LRH)*8+8,LRC*8:].any() and all(len(LR[b])<=LRW-2 for b in LR)
+        # issue #16: L+R DX-opts overlay retired; keep a blank help_lr.bin (8x64-byte rows) for asm layout
+        lrmap=bytearray(LRH*64)
+        Image.fromarray(np.zeros((224,256),np.uint8)).save(GEN+'/help_preview_lr.png')
     for ty in range(28):
         for tx in range(32):
             maps+=enc(img,pal,ty,tx)

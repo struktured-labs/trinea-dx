@@ -35,7 +35,7 @@ help_chk:
     SEP #$20
     LDA $F0
     BNE .out
-    LDA.l $000082      ; held pad (B Y Sel Start ...); Select hidden by asm/options.asm while L+R are held (Start is not)
+    LDA.l $000082      ; held pad (B Y Sel Start ...)
     AND #$20
     PHA
     EOR.l !H
@@ -300,11 +300,12 @@ h_wait:                 ; A8: one frame while the overlay is up. Right after the
     LDA #$38            ; back to our channel 6 only: the NMI ORs effect channels into $0831 (e.g. C0:7E1C) and
     JSL help_wait       ; writes $420C from it, which would run a stage's scroll wave under the overlay
     LDA #$40 : STA $0831 : STA $420C
-    ; fall through: L+R held -> X/A/Y/B labels show the L+R+button DX options (help_lr), released -> back
-h_lr:                   ; A8 X16, DB 0. Map rows 3..10, columns 18..31 (8 x 14 words), only on a change, in the
-    LDA $0083           ; next vblank (one NMI is skipped, like h_off). The game is frozen here, so L+R+button
-    AND #$30            ; never reaches asm/options.asm combo; L+R also hide Select (not Start), so Select can only
-    CMP #$30            ; close with L+R released (combo then sees no held combo and syncs its prev)
+    ; fall through
+h_lr:                   ; issue #16: L+R DX-opts label swap retired (opts live in Configuration; L/R are move shortcuts)
+    RTS
+    LDA $0083           ; (kept below as dead code for byte-layout reference; unreachable)
+    AND #$30
+    CMP #$30
     BEQ +
     LDA #$00
 +   CMP.l !H+69

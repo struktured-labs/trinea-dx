@@ -25,7 +25,7 @@ org $C13A92
     NOP
 
 ; --- player collision chain + per-tick hook
-; --- joypad read (replaces perf_joy target): keep raw pad in SRAM scratch, hide face buttons/Select from the game while L+R held (Start passes through: L+R+Start = plain pause)
+; --- joypad read (replaces perf_joy target): keep raw pad in WRAM scratch (!W+10/11). issue #16: no L+R face-button hide
 org $C004F8
     JML joy
 
@@ -250,182 +250,20 @@ combo:
 if defined("HAS_SKIP")
     JSL sk_field            ; field tick: no script running -> skip mode off, Start edge tracker synced
 endif
-    ; current relevant buttons (only while L+R held): bit7 A, bit6 X, bit5 Y, bit4 B
-    LDA.l !W+10
-    AND #$30
-    CMP #$30
-    BEQ +
-    LDA #$00
-    BRA ++
-+   LDA.l !W+11
-    AND #$40
-    LSR
-    STA.l !W+8
-    LDA.l !W+11      ; B -> bit4 (rumble off)
-    AND #$80
-    LSR
-    LSR
-    LSR
-    ORA.l !W+8
-    STA.l !W+8
-    ; (v1.1.1: L+R+Select toggle removed; Select stays hidden from the game while L+R is held. 16 NOPs keep the layout)
-    NOP : NOP : NOP : NOP : NOP : NOP : NOP : NOP
-    NOP : NOP : NOP : NOP : NOP : NOP : NOP : NOP
-    LDA.l !W+10
-    AND #$C0
-    ORA.l !W+8
-++  PHA
-    JSL getopt
-    STA.l !W+9
-    ; signature valid? (cached by getopt above) if not and no new press, nothing else to do
-    LDA.l !W+2
-    BNE .sig
-.nosig:
-    PLA
-    PHA
-    BNE +
-    PLA
-    PLP
-    RTL
-+   LDA #$54          ; first use: init block, defaults OFF
-    STA.l !S
-    LDA #$44
-    STA.l !S+1
-    LDA #$00
-    STA.l !S+2
-    STA.l !W+4
-    STA.l !W+5
-    LDA #$A5
-    STA.l !S+3
-    LDA #$00
-    STA.l !W+9
-    STA.l !W          ; invalidate cache
-.sig:
-    PLA
-    PHA
-    EOR.l !W+4        ; new presses = cur & ~prev
-    AND $01,s
-    STA.l !W+8
-    PLA
-    STA.l !W+4
-    LDA.l !W+8
-    BIT #$40
-    BEQ +
-    LDA.l !W+9
-    EOR #$01
-    STA.l !W+9
-    AND #$01
-    BRL .set
-+   LDA.l !W+8
-    BIT #$20
-    BEQ +
-    LDA.l !W+9
-    LSR
-    AND #$03
-    INC
-    CMP #$03
-    BCC ++
-    LDA #$00
-++  PHA
-    ASL
-    STA.l !W+8
-    LDA.l !W+9
-    AND #$F9
-    ORA.l !W+8
-    STA.l !W+9
-    PLA
-    BRA .set
-+   LDA.l !W+8
-    BIT #$80
-    BEQ .bchk
-    LDA.l !W+9
-    EOR #$08
-    STA.l !W+9
-    LSR
-    LSR
-    LSR
-    AND #$01
-    BRA .set
-.bchk:
-    LDA.l !W+8
-    BIT #$10
-    BEQ .schk
-    LDA.l !W+9
-    AND #$EF          ; drop the retired bit4 (old rumble-off) on any rumble toggle
-    EOR #$20          ; rumble off is bit5 now
-    STA.l !W+9
-    LSR
-    LSR
-    LSR
-    LSR
-    LSR
-    AND #$01
-    BRA .set
-.schk:
-    LDA.l !W+8
-    BIT #$08
-    BEQ .fb
-    LDA.l !W+9
-    EOR #$40          ; bit6 = Start-skips-dialogue OFF
-    STA.l !W+9
-    ASL
-    ASL
-    LDA #$00
-    ROL               ; A = bit6
-    BRA .set
-.set:               ; A = displayed value (0..2)
-    INC
-    ASL
-    ASL
-    ASL             ; blinks*8 ticks
-    PHA
-    LDA.l !W+5
-    BNE +
-    LDA $00B4
-    STA.l !W+6
-+   PLA
-    STA.l !W+5
-    LDA.l !W+9
-    STA.l !S+2
-    EOR #$A5
-    STA.l !S+3
-    LDA #$00
-    STA.l !W          ; invalidate cache (re-read SRAM once)
-.fb:                ; feedback mosaic
-    LDA.l !W+5
-    BEQ .done
-    DEC
-    STA.l !W+5
-    BEQ .rest
-    AND #$04
-    BEQ .rest
-    LDA #$FF
-    STA $00B4
-    BRA .done
-.rest:
-    LDA.l !W+6
-    STA $00B4
-.done:
+    ; issue #16: L+R+button DX option hotkeys retired (toggles live in Configuration)
     PLP
     RTL
 
 joy:
     PHP
     SEP #$20
--   LDA $4212        ; hardware-safety fix: wait for VBlank END like the original game (not just auto-joypad
-    BMI -            ; busy): keeps the original NMI timing (main thread never runs inside VBlank, rumble's
-                     ; manual $4016 clocking never overlaps auto-joypad) - suspected cause of real-hw freezes
+-   LDA $4212        ; wait for VBlank END like the original game (not just auto-joypad
+    BMI -            ; busy): keeps the original NMI timing
     LDA $4219
     STA.l !W+11
     STA $0082
     LDA $4218
     STA.l !W+10
     STA $0083
-    AND #$30
-    CMP #$30
-    BNE +
-    STA $0083
-    LDA $0082
-    AND #$1F          ; keep Start (bit4) and the d-pad; hide B/Y/Select
-    STA $0082
-+   JML $C0050C
+    ; issue #16: face buttons/Select no longer hidden while L+R held (hotkeys retired)
+    JML $C0050C
