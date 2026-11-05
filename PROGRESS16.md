@@ -38,14 +38,24 @@ Screenshots: `/workspace/issue16/impl/`
 ### 5. Per-hero L/R shortcuts
 - `lr_sc` in `asm/options.asm` (from `joy`): pads `$82`=B Y Sel Start UDLR, `$83`=A X L R; always strip L/R from game `$83`.
 - L: Hornisse mash-B pulse (2 on / 4 off); Sara/Ryo B+Y. R: A+B. L+R: two D-pad circles then face button (Hornisse/Sara 4-on/2-off; Ryo 1-frame/dir). Scratch `!W+12..+15`. P2 stub: would mirror on `$086E/$086F` after `C0050C`.
-- Headless (warm 0/2/5): Sara L→act 60, R→72, L+R→act 64 gold 100→90; Hornisse L→act 60 (frenzy), R→72, L+R→act 64 gold 100→90. Ryo L/R inject verified via poked `$1430` (acts 60/64).
+- Headless: Sara L→act `$1431`=60, R→homing, L+R→64 gold 100→90; Hornisse L→mash frenzy, R→morning star, L+R→lightning gold 90.
+- Ryo real state (`smoke2_loc`→skip dialogue→`ryo_field.st`, hero=3): L→act 61 wall of fire, R→act 65 bombs, L+R→act 52 shadow clones gold 100→90.
+- Ryo L+R spin fixed to 6 frames/dir ×4 ×2 circles then Y (1-frame/dir only fired Y; N=2 spin check needs ~6f).
 - Docs: `docs/MOVES.md`, `README.md`, `CHANGELOG.md` (Unreleased).
-- Shots: `step5_sara_{l,r,lr}.png`, `step5_horn_{l,r,lr}.png`.
-- Build md5 (ROM): `e5b30fc61564ee0846bf864df3947f5a`.
+- Shots: `step5_sara_{l,r,lr}.png`, `step5_horn_{l,r,lr}.png`, `step5_ryo_{l,r,lr}.png`.
+- Build md5 (ROM, post-Ryo fix): `a4c753a75057fe51cebd4770bc6828cc`.
+
+## Follow-ups (pre-Carmelo)
+1. ~~Ryo real-state L/R/L+R~~ Done.
+2. Sound Test number display restore.
+3. Full regression savestate suite.
+4. Fresh SRAM defaults + v1.1.3 opts carry-over.
+5. Rebuild IPS/ROM md5s.
+6. Deploy NEW file to rivalmage (no launch).
 
 ## Next
-- IPS in `build/`; optional regression savestate pass; release notes when cutting v1.1.4.
 - P2 L/R shortcuts (structure noted; not implemented).
+- Release notes when cutting v1.1.4.
 
 ## Notes
 - Local only; no push / GitHub / rivalmage / OBS.

@@ -412,12 +412,13 @@ lr_spin:                  ; L+R: two rotate circles then face button (reliable v
     AND #$03
     JMP lr_spin_dir
 
-lr_spin_ryo:              ; Ryo: 1-frame/dir x4 x2 circles = 8, then 8 button (phase 0..15)
+lr_spin_ryo:              ; Ryo: 6-on/dir x4 x2 circles = 48, then 8 Y (phase 0..55).
+                          ; Spin check N=2 (~8 frames max/dir); 6f/dir hits clones, 1f only fires Y.
     LDA.l !W+12
     INC
     STA.l !W+12
     DEC A
-    CMP #16
+    CMP #56
     BCC +
     LDA #$00
     STA.l !W+12
@@ -425,10 +426,27 @@ lr_spin_ryo:              ; Ryo: 1-frame/dir x4 x2 circles = 8, then 8 button (p
 +   PHA
     JSR lr_spin_clear
     PLA
-    CMP #8
-    BCC +
+    CMP #48
+    BCC .ry_dirs
     JMP lr_spin_btn
-+   AND #$03
+.ry_dirs:
+    PHA
+    LDA #$00
+    STA.l !W+15
+    PLA
+-   CMP #6
+    BCC .ry_sub
+    SEC
+    SBC #6
+    PHA
+    LDA.l !W+15
+    INC
+    STA.l !W+15
+    PLA
+    BRA -
+.ry_sub:
+    LDA.l !W+15
+    AND #$03
     JMP lr_spin_dir
 
 lr_spin_clear:
