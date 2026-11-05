@@ -5,6 +5,7 @@
 !TM_ATTR_DIM    = $2A00
 !TM_ATTR_BRIGHT = $2C00
 !TM_VRAM        = $6020
+!TM_SEL         = $7ECF30
 
 ; -------------------- CE hooks --------------------
 org $CE3539
@@ -119,6 +120,12 @@ title_spawn:
     STA $01,s
     BNE .loop
     PLA
+    ; Selection → LOAD GAME
+    SEP #$20
+    LDA #$00
+    STA.l !TM_SEL
+    STA $20
+    REP #$20
     ; Brighten row 0 (LOAD GAME)
     LDA #!TM_ATTR_BRIGHT
     LDX #$0000
@@ -138,6 +145,7 @@ title_spawn:
     RTL
 
 title_hl_paint:
+    ; Selection in !TM_SEL (long). dp $20 is not trustworthy across the title loop.
     PHP
     PHB
     SEP #$20
@@ -157,12 +165,13 @@ title_hl_paint:
     PLA
     CPX.w #!TM_N<<4
     BCC .dim
-    SEP #$20
-    LDA $20
-    CMP #$03
+    LDA.l !TM_SEL
+    AND #$00FF
+    CMP #$0003
     BCC +
-    LDA #$00
-+   TAX
+    LDA #$0000
++   TAX                     ; 16-bit X = 0..2
+    SEP #$20
     LDA.l title_rowbase,x
     STA $00
     LDA.l title_counts,x
@@ -190,9 +199,8 @@ title_hl_paint:
     PLP
     RTS
 
+; Edge bits in $A9 (vanilla Left/Right) plus Up/Down.
 title_nav:
-    ; Match original: edge bits in $A9 (Left/Right), plus Up/Down.
-    ; Force DBR=$7E so $20 and object attrs land in WRAM.
     PHP
     PHB
     SEP #$20
@@ -210,20 +218,22 @@ title_nav:
     CLC
     RTL
 .prev:
-    LDA $20
+    LDA.l !TM_SEL
     AND #$00FF
     DEC
     BPL .set
     LDA #$0002
     BRA .set
 .next:
-    LDA $20
+    LDA.l !TM_SEL
     AND #$00FF
     INC
     CMP #$0003
     BCC .set
     LDA #$0000
 .set:
+    AND #$00FF
+    STA.l !TM_SEL
     SEP #$20
     STA $20
     REP #$20
@@ -235,13 +245,16 @@ title_nav:
 
 title_start:
     REP #$20
-    LDA.l $7E0020
+    LDA.l !TM_SEL
     AND #$00FF
     CMP #$0002
     BNE .orig
     JML $CE3326              ; OPTIONS → same path as Select
 .orig:
+    ; Mirror sel into dp $20 (0=LOAD, 1=NEW) then vanilla start (A=1).
     SEP #$20
+    LDA.l !TM_SEL
+    STA $20
     LDA #$01
     JSL $C08419
     JML $CE35ED

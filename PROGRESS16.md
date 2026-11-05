@@ -6,33 +6,25 @@ Screenshots: `/workspace/issue16/impl/`
 
 ## Done
 
-### Step 1 (partial) — Title labels LOAD GAME / NEW GAME
-- Redrew title font CHR (`asm/bin/titlefont.bin`) in existing style; bottoms at +16; FI map with blank at slot 9; unused C → pristine O.
-- Font DMA on channel 7 during vblank + force blank; restore INIDISP `#$0F` (never read write-only `$2100`).
-- Labels centered, Y stack 136/154/172.
-- Highlight attrs paint (`$2C00` / `$2A00`); LOAD GAME bright on spawn.
-- Screenshots: `title_v12.png`, `crop_v12.png` — glyphs correct and bright.
+### 1. Title labels — LOAD GAME / NEW GAME
+- Font CHR redrawn (`asm/bin/titlefont.bin`), DMA ch7 during vblank, INIDISP `#$0F`.
+- Centered labels, Y 136/154/172; highlight `$2C00`/`$2A00`.
+- Shot: `title_step1.png`, `nav5_*_crop.png`.
 
-### Step 2 (partial) — OPTIONS entry
-- Third row OPTIONS in vertical stack; Select still opens Configuration (`title_v12_cfg_select.png`).
-- Start→OPTIONS hook present (`JML $CE3326`) but **nav selection not sticky yet**.
+### 2. OPTIONS entry
+- Vertical stack LOAD GAME / NEW GAME / OPTIONS.
+- Nav via `$A9` edges (Up/Left, Down/Right); selection in `$7ECF30` (`!TM_SEL`).
+- Start on OPTIONS → Configuration (`title_options_confirm.png`); Select still works (`opt_via_select.png`).
+- Commits: `a4abab4` (WIP font/spawn), *(this commit)*.
 
-## In progress / blocked
-
-- **Title nav / selection:** `$20` via `STA $20` is direct-page; value not surviving. Attrs sometimes paint wrong rows (NEW+OPTIONS both bright). Next: keep selection in `$7ECF30` with long addressing; fix 16-bit index TAX; verify Up/Down + Start on OPTIONS.
-- Hooks: spawn `$CE3539`, count PEA `$CE34EE`, nav `$CE3382` → drawall `$34D5`, start `$CE336F`.
-
-## Not started
+## Next
 
 3. Config rows: Turbo / Fast foes / Hero Speed / Rumble via getopt/setopt; persist; optional Sound Test nest.
 4. Retire L+R hotkeys; update Select Controls overlay.
-5. Per-hero L/R move shortcuts (P1 now, structure for P2); Hornisse L = mash Sword Frenzy per [pt496u].
-- Docs: MOVES.md, README controls, CHANGELOG unreleased.
-- IPS + ROM md5s; regression savestates.
-- Local commits per step; no push / no GitHub comments.
+5. Per-hero L/R shortcuts (P1; structure for P2). Hornisse L = mash Sword Frenzy ([pt496u]).
+- Docs + IPS/ROM md5s + regression savestates.
 
-## Deviations / notes
-
-- CloudAgent unavailable → local impl.
-- Do not touch rivalmage, saves, OBS.
-- Emulators headless only (`tools/py/lr.py` + bsnes-mercury).
+## Notes
+- Local only; no push / GitHub / rivalmage / OBS.
+- Headless bsnes-mercury via `tools/py/lr.py`.
+- dp `$20` is not a durable title selection store; use `!TM_SEL`.
