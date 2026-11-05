@@ -96,6 +96,25 @@ getopt:            ; A8 in/out: A = opts (0 if signature invalid). SRAM is read 
     LDA.l !W+1
     RTL
 
+setopt:            ; A8 in/out: A = opts to store. Writes SRAM signature + opts, refreshes WRAM cache.
+    STA.l !W+1
+    PHA
+    LDA #$54
+    STA.l !S
+    LDA #$44
+    STA.l !S+1
+    PLA
+    STA.l !S+2
+    EOR #$A5
+    STA.l !S+3
+    LDA.l !W+1
+    EOR #$5A
+    STA.l !W+3
+    LDA #$A5
+    STA.l !W
+    LDA.l !W+1
+    RTL
+
 turbo:             ; A8; returns carry = ($082C >= threshold)
     JSL getopt
     AND #$01
