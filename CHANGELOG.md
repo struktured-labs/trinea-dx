@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (issue #16)
+- Title menu: LOAD GAME / NEW GAME / OPTIONS (was CONTINUE/START); Start on OPTIONS opens Configuration.
+- Configuration menu: Turbo, Fast foes, Hero Speed, Rumble rows (plus nested Sound Test); opts persist in SRAM $30:6300.
+- Retired field L+R+button DX option hotkeys; Select overlay no longer swaps to "L+R: DX opts".
+- Per-hero L/R move shortcuts (P1): L/R synthesize specials; L+R plays the rotate move. Hornisse L = mash Sword Frenzy.
+
 ## v1.1.3 (2026-11-01)
 - Fixed: Play Level Easy (Configuration menu) halved the damage YOU dealt and left damage taken unchanged, because the original code at C1:43C3 doubles hero attack on every level except Easy. Easy now deals Normal damage and halves enemy contact/projectile damage to the hero (min 1). Hard still doubles enemy damage, now clamped at 255 instead of wrapping for base values of 128 or more. Normal is unchanged (#13). The hidden Configuration menu opens with Select on the title screen's CONTINUE/START.
 - Fixed: Ryo's shadow clones were documented as a "slow" spin (Select overlay, README, MOVES). The game (C0:88E0 -> C0:8707) requires a FAST spin for Ryo: each direction held under 2 input samples (~8 frames) vs 6 for Hornisse and Sara. Overlay now reads "Spin D-pad (fast) then Y".

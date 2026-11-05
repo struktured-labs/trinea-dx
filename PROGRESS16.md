@@ -33,12 +33,19 @@ Screenshots: `/workspace/issue16/impl/`
 - `helpgfx.py`: L/R labels are per-hero shortcuts (Hornisse Sword frenzy / Morning star; Sara Star fall / Homing flame; Ryo Wall of fire / Bombs); tip `{L}/{R}: shortcuts` + `{L+R}: rotate move`; `help_lr.bin` blank stub; `h_lr` immediate RTS.
 - Headless: pristine L+R+X writes opts `544401a4`; dx-issue16 stays `ffffffff`. Overlay open + L+R held keeps face/shortcut labels (no DX-opts swap).
 - Shots: `step4_overlay_hi.png`, `step4_overlay_lr_hi.png`, `help_{horn,sara,ryo}_step4.png`, `step4_pristine_lrx.png`.
-- Build md5 (ROM): `c51a1dc99fbd42ce2b126486b5457a1d`.
+- Build md5 (ROM, step4): `c51a1dc99fbd42ce2b126486b5457a1d`.
+
+### 5. Per-hero L/R shortcuts
+- `lr_sc` in `asm/options.asm` (from `joy`): pads `$82`=B Y Sel Start UDLR, `$83`=A X L R; always strip L/R from game `$83`.
+- L: Hornisse mash-B pulse (2 on / 4 off); Sara/Ryo B+Y. R: A+B. L+R: two D-pad circles then face button (Hornisse/Sara 4-on/2-off; Ryo 1-frame/dir). Scratch `!W+12..+15`. P2 stub: would mirror on `$086E/$086F` after `C0050C`.
+- Headless (warm 0/2/5): Sara L→act 60, R→72, L+R→act 64 gold 100→90; Hornisse L→act 60 (frenzy), R→72, L+R→act 64 gold 100→90. Ryo L/R inject verified via poked `$1430` (acts 60/64).
+- Docs: `docs/MOVES.md`, `README.md`, `CHANGELOG.md` (Unreleased).
+- Shots: `step5_sara_{l,r,lr}.png`, `step5_horn_{l,r,lr}.png`.
+- Build md5 (ROM): `e5b30fc61564ee0846bf864df3947f5a`.
 
 ## Next
-
-5. Per-hero L/R shortcuts (P1; structure for P2). Hornisse L = mash Sword Frenzy ([pt496u]); R = A+B-class; L+R = rotate+button.
-- Docs (MOVES/README/CHANGELOG) + IPS/ROM md5s + regression savestates.
+- IPS in `build/`; optional regression savestate pass; release notes when cutting v1.1.4.
+- P2 L/R shortcuts (structure noted; not implemented).
 
 ## Notes
 - Local only; no push / GitHub / rivalmage / OBS.

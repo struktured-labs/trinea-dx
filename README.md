@@ -104,7 +104,7 @@ Editing the translation:
   - the struktured labs boot splash with sound (`asm/splash.asm`, bank E8)
   - RumbleShock rumble (`asm/rumble.asm`, bank E7)
   - the perf patch (`asm/perf.asm`, FE:0000)
-  - runtime options (`asm/options.asm`, FE:0200, SRAM $30:6300). In the field, hold L+R, then tap X = turbo, Y = hero speed (any hero; mainly brings Sara up to her Game Boy speed), A = faster monsters, B = rumble off. (L+R+Select does nothing since v1.1.1.)
+  - runtime options (`asm/options.asm`, FE:0200, SRAM $30:6300). Turbo / Fast foes / Hero Speed / Rumble live in the Configuration menu (title OPTIONS). Field L+R are per-hero move shortcuts (issue #16).
   - Start-skips-dialogue (`asm/skip.asm`, E9:0000, always on since v1.1.1; saved opts bit6 is ignored) and the Count Vampierre zap rumble.
 
 ## Moves (quick reference; full list in [docs/MOVES.md](docs/MOVES.md))
@@ -113,14 +113,16 @@ Editing the translation:
 - **Hornisse:** A/B/Y normals; mash B for the sword frenzy; A+B morning star; rotate the D-pad then A for lightning ("Electric Buffalo").
 - **Sara:** rotate then B for Dragon Fire; B+Y star fall; A+B homing flame.
 - **Ryo:** rotate fast then Y for shadow clones; B+Y wall of fire; A+B bombs.
-- **Toggles:** L+R+X turbo, L+R+Y hero speed, L+R+A faster monsters, L+R+B rumble off. Two blinks = on, one = off. All default to off except rumble (L+R+B turns it off). L+R+Select does nothing. L+R+Start is just Start (pause); the Select help overlay is always on.
-- **Select = controls help:** in the field or a stage, Select shows a pad diagram with button actions and the character's moves; Select or Start closes it (see docs/MOVES.md).
+- **L/R shortcuts:** L/R (and L+R for rotate moves) fire each hero's specials — Hornisse mash-B frenzy / morning star / lightning; Sara star fall / homing flame / Dragon Fire; Ryo wall of fire / bombs / shadow clones.
+- **Toggles:** Configuration menu (title OPTIONS): Turbo, Fast foes, Hero Speed, Rumble. Field L+R+button hotkeys are retired. Defaults off except rumble (on until turned off). Select help overlay is always on.
+- **Select = controls help:** in the field or a stage, Select shows a pad diagram with button actions (incl. L/R shortcuts) and the character's moves; Select or Start closes it (see docs/MOVES.md).
 - **Start skips dialogue:** press Start while text is showing to skip the rest of the scene's text; flags, map moves and battles still happen.
 - **Boss tip:** the contraption boss is easy from the side.
 
 ## Roadmap
 
-- **v1.1.3 (latest):** Play Level Easy fixed (Easy now deals Normal damage and takes half damage, min 1; Hard's doubled damage capped at 255; [#13](https://github.com/struktured/trinea-dx/issues/13)), hero speed now works for Ryo ([#15](https://github.com/struktured/trinea-dx/issues/15)), and the overlay says Ryo's clone spin is fast.
+- **Next (issue #16, unreleased):** title LOAD GAME / NEW GAME / OPTIONS; Configuration menu hosts Turbo / Fast foes / Hero Speed / Rumble; field L+R+button DX hotkeys retired; L/R are per-hero move shortcuts.
+- **v1.1.3 (latest release):** Play Level Easy fixed (Easy now deals Normal damage and takes half damage, min 1; Hard's doubled damage capped at 255; [#13](https://github.com/struktured/trinea-dx/issues/13)), hero speed now works for Ryo ([#15](https://github.com/struktured/trinea-dx/issues/15)), and the overlay says Ryo's clone spin is fast.
 - **v1.1.2:** fixes the Select controls overlay text being shifted/wavy in stages with BG3 scroll HDMA (e.g. Neo Edo, [#12](https://github.com/struktured/trinea-dx/issues/12)).
 - **v1.1.1:** removed the L+R+Select dialogue-skip toggle; Start always skips dialogue.
 - **v1.1:** Trinea DX: speed improvements, L+R+button option toggles, rumble, Select controls overlay,

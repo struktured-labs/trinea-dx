@@ -9,7 +9,7 @@ hirom
 ; scratch (prev buttons, feedback ticks, saved mosaic, raw pad) lives in WRAM !W+4..+11, not SRAM: SRAM is only read when
 ; the WRAM cache is invalid and only written when a toggle changes (issue #4 real-hardware hardening)
 !S = $306300
-!W = $7ECF10      ; WRAM cache/scratch (hw fix #4): +0 $A5 = cache valid, +1 opts, +2 sig valid, +3 opts^$5A (cache check), +4..+11 pad/feedback scratch
+!W = $7ECF10      ; WRAM cache/scratch (hw fix #4): +0 $A5 = cache valid, +1 opts, +2 sig valid, +3 opts^$5A (cache check), +4..+11 pad/feedback scratch, +12..+15 L/R shortcut phase (issue #16)
 
 ; --- main-loop tick wait (both copies): LDA $082C : CMP #$04 -> JSL turbo : NOP
 org $C00268
@@ -265,5 +265,227 @@ joy:
     LDA $4218
     STA.l !W+10
     STA $0083
-    ; issue #16: face buttons/Select no longer hidden while L+R held (hotkeys retired)
+    ; issue #16: no L+R face-hide; synthesize per-hero L/R shortcuts into $82/$83
+    JSL lr_sc
     JML $C0050C
+
+; ---- issue #16: per-hero L/R move shortcuts (P1). Pads: $82 = B Y Sel Start U D L R, $83 = A X L R.
+; L = B+Y (Sara Star fall / Ryo Wall of fire) or Hornisse mash-B Sword frenzy; R = A+B; L+R = rotate then face btn.
+; Raw shoulders stay in !W+10; game-visible $83 always has L/R cleared. P2 would mirror on $086E/$086F after C0050C.
+lr_sc:
+    PHP
+    SEP #$20
+    LDA $00F0
+    BNE .strip
+    LDA $1430
+    BEQ .strip
+    CMP #$04
+    BCS .strip
+    LDA $0083
+    AND #$30              ; L=#$20 R=#$10
+    CMP #$30
+    BNE +
+    JMP lr_spin
++   CMP #$20
+    BNE +
+    JMP lr_L
++   CMP #$10
+    BNE +
+    JMP lr_R
++   LDA #$00
+    STA.l !W+12
+    STA.l !W+13
+.strip:
+    LDA $0083
+    AND #$CF              ; drop L/R so shoulders are dedicated to shortcuts
+    STA $0083
+    PLP
+    RTL
+
+lr_R:                     ; R -> A+B
+    LDA #$01
+    STA.l !W+13
+    LDA #$00
+    STA.l !W+12
+    LDA $0082
+    ORA #$80              ; B
+    STA $0082
+    LDA $0083
+    AND #$CF
+    ORA #$80              ; A
+    STA $0083
+    PLP
+    RTL
+
+lr_L:
+    LDA $1430
+    CMP #$01
+    BEQ lr_mash           ; Hornisse: mash B
+    LDA #$02
+    STA.l !W+13
+    LDA #$00
+    STA.l !W+12
+    LDA $0082
+    ORA #$C0              ; B+Y
+    STA $0082
+    LDA $0083
+    AND #$CF
+    STA $0083
+    PLP
+    RTL
+
+lr_mash:
+    LDA.l !W+13
+    CMP #$03
+    BEQ +
+    LDA #$00
+    STA.l !W+12           ; fresh L press: restart pulse
++   LDA #$03
+    STA.l !W+13
+    LDA.l !W+12
+    INC
+    STA.l !W+12
+    CMP #$06
+    BCC +
+    LDA #$00
+    STA.l !W+12
++   LDA.l !W+12
+    CMP #$02              ; frames 0-1: B down; 2-5: up (~10 taps/s)
+    BCS +
+    LDA $0082
+    ORA #$80
+    STA $0082
++   LDA $0083
+    AND #$CF
+    STA $0083
+    PLP
+    RTL
+
+lr_spin:                  ; L+R: two rotate circles then face button (reliable vs one)
+    LDA.l !W+13
+    CMP #$04
+    BEQ +
+    LDA #$00
+    STA.l !W+12           ; fresh L+R: restart
++   LDA #$04
+    STA.l !W+13
+    LDA $1430
+    CMP #$03
+    BNE +
+    JMP lr_spin_ryo
++   ; Hornisse/Sara: 4-on/2-off x4 dirs x2 circles = 48, then 8 button (phase 0..55)
+    LDA.l !W+12
+    INC
+    STA.l !W+12
+    DEC A
+    CMP #56
+    BCC +
+    LDA #$00
+    STA.l !W+12
+    LDA #$00
++   PHA
+    JSR lr_spin_clear
+    PLA
+    CMP #48
+    BCC .hs_dirs
+    JMP lr_spin_btn
+.hs_dirs:
+    PHA
+    LDA #$00
+    STA.l !W+15           ; dir-step quotient
+    PLA
+-   CMP #6
+    BCC .hs_sub
+    SEC
+    SBC #6
+    PHA
+    LDA.l !W+15
+    INC
+    STA.l !W+15
+    PLA
+    BRA -
+.hs_sub:
+    CMP #4                ; 0-3 hold dir, 4-5 gap
+    BCC +
+    JMP lr_spin_done      ; gap frame
++   LDA.l !W+15
+    AND #$03
+    JMP lr_spin_dir
+
+lr_spin_ryo:              ; Ryo: 1-frame/dir x4 x2 circles = 8, then 8 button (phase 0..15)
+    LDA.l !W+12
+    INC
+    STA.l !W+12
+    DEC A
+    CMP #16
+    BCC +
+    LDA #$00
+    STA.l !W+12
+    LDA #$00
++   PHA
+    JSR lr_spin_clear
+    PLA
+    CMP #8
+    BCC +
+    JMP lr_spin_btn
++   AND #$03
+    JMP lr_spin_dir
+
+lr_spin_clear:
+    LDA $0082
+    AND #$30              ; keep real Select/Start
+    STA.l !W+14
+    STZ $0082
+    STZ $0083
+    RTS
+
+lr_spin_dir:              ; A = 0 R, 1 D, 2 L, 3 U
+    CMP #$00
+    BEQ .dr
+    CMP #$01
+    BEQ .dd
+    CMP #$02
+    BEQ .dl
+    LDA.l !W+14
+    ORA #$08
+    STA $0082
+    JMP lr_spin_done
+.dr:
+    LDA.l !W+14
+    ORA #$01
+    STA $0082
+    JMP lr_spin_done
+.dd:
+    LDA.l !W+14
+    ORA #$04
+    STA $0082
+    JMP lr_spin_done
+.dl:
+    LDA.l !W+14
+    ORA #$02
+    STA $0082
+    JMP lr_spin_done
+
+lr_spin_btn:
+    LDA $1430
+    CMP #$01
+    BEQ .ba
+    CMP #$02
+    BEQ .bb
+    LDA.l !W+14
+    ORA #$40              ; Ryo Y
+    STA $0082
+    JMP lr_spin_done
+.ba:
+    LDA #$80              ; Hornisse A
+    STA $0083
+    LDA.l !W+14
+    STA $0082
+    JMP lr_spin_done
+.bb:
+    LDA.l !W+14
+    ORA #$80              ; Sara B
+    STA $0082
+lr_spin_done:
+    PLP
+    RTL

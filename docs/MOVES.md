@@ -45,20 +45,22 @@ Button tables: C0:894B (Hornisse), C0:88FE (Sara), C0:8998 (Ryo). Each maps a bu
 | A+B | bombs | free |
 | X | petal storm (the screen turns magenta and three-lobed petals swirl across it, then every enemy on screen explodes) | 1 X-special use |
 
-## In-game toggles (DX options)
-Hold L+R in the field, then tap a button. The screen gives a mosaic blink to confirm: **two blinks = on, one blink = off**. Every toggle defaults to **off** (rumble itself is on; L+R+B turns it off). Settings are kept in battery SRAM ($30:6300).
+## L/R move shortcuts (issue #16)
+Shoulder buttons synthesize the matching special for the current hero (P1). L and R are cleared from the game pad so they are dedicated to shortcuts.
 
-| Combo | Toggle |
-|---|---|
-| L+R+X | turbo (faster game logic) |
-| L+R+Y | Hero speed, for any hero (Hornisse, Sara, Ryo). Mainly there to bring Sara up to her Game Boy speed. Cycles off / fast / faster, shown as 1 / 2 / 3 blinks |
-| L+R+A | faster monsters |
-| L+R+B | rumble off. Use it for testing on real hardware, or when using a pad without rumble motors. Stored in opts bit5 since 2026-10-19; the old bit4 flag (afb92e1a/2339e2b8) is ignored, so those saves get rumble back |
-| L+R+Start | nothing special: plain Start (pause). The old help-overlay toggle was removed; saves that had it off get the overlay back |
-| L+R+Select | nothing (v1.1.1 removed the dialogue-skip toggle; saves that had skip off skip again) |
+| Hero | L | R | L+R |
+|---|---|---|---|
+| Hornisse | mash B (Sword frenzy) | A+B (Morning star) | rotate then A (Lightning) |
+| Sara | B+Y (Star fall) | A+B (Homing flame) | rotate then B (Dragon Fire) |
+| Ryo | B+Y (Wall of fire) | A+B (Bombs) | fast rotate then Y (Shadow clones) |
+
+Hold L/R (or both) in the field or a stage. L+R plays two full D-pad circles then the face button so the stock spin check accepts it.
+
+## DX options (Configuration menu)
+Turbo, Fast foes, Hero Speed, and Rumble are toggled in the **Configuration** menu (title OPTIONS, or Select on the title). The old field L+R+button hotkeys are retired. Settings stay in battery SRAM ($30:6300); defaults are off (rumble itself is on until you turn it off).
 
 ## Select: controls help
-Press **Select** in the field or a stage (anywhere Start would pause) to freeze the game and show a full-screen page: an SNES pad with what each button does, plus the current character's moves from this file. **Select or Start** closes it and the screen comes back exactly as it was (the music keeps playing). It never opens in menus, shops, dialogue, cutscenes or the attract demo. It is always available (there is no off switch; the old L+R+Start toggle was removed). While it is open, **hold L+R** and the X/A/Y/B labels change to the L+R+button DX options (Turbo, Fast foes, Hero speed, Rumble off), shown in cyan below the "L+R: DX opts" hint; let go and they change back. Pressing a button there does not toggle anything (the game is frozen; Select/Start close it only once L+R are released). Screenshots: `docs/screenshots/overlay_lr_*.png`. In the original game Select does nothing in play (it is only read on the title screen and by an unreachable debug menu), so nothing is taken away. Screenshots: `docs/screenshots/help_overlay_*.png`.
+Press **Select** in the field or a stage (anywhere Start would pause) to freeze the game and show a full-screen page: an SNES pad with what each button does (including the L/R shortcuts above), plus the current character's moves from this file. Tip line: `{L}/{R}: shortcuts` / `{L+R}: rotate move`. **Select or Start** closes it and the screen comes back exactly as it was (the music keeps playing). It never opens in menus, shops, dialogue, cutscenes or the attract demo. It is always available (no off switch). In the original game Select does nothing in play, so nothing is taken away. Screenshots: `docs/screenshots/help_overlay_*.png`.
 
 ## Start skips dialogue
 While a message is printing or waiting for A, press **Start** to skip the rest of the current scene's text (a press while text is still printing takes effect at the next prompt, so menus such as the save list always draw in full). The script still runs every non-text command (story flags, map moves, items, LIFE, character branches, battles), so nothing is missed; only the text is hidden and [wait] prompts are passed. Choice prompts and menus still appear and wait for you. Start = pause in gameplay is unchanged (skip only acts while a script is running). It is always available (no toggle since v1.1.1).
