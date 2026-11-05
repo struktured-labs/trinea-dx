@@ -47,11 +47,22 @@ Screenshots: `/workspace/issue16/impl/`
 
 ## Follow-ups (pre-Carmelo)
 1. ~~Ryo real-state L/R/L+R~~ Done (`943679a`).
-2. ~~Sound Test number display~~ Done.
+2. ~~Sound Test number display~~ Done (`16e195e`).
    - D9 stub `cfg_jsr_num` → `$9A9B`; digit at `$0638` (after SFX/BGM at `$062C`).
    - Blank `$0634..$0638` before draw (`$9A9B` skips leading zeros and writes right-to-left; without blank, tens digit goes stale on 0–9).
    - Verified: SFX15, BGM0, BGM3, back to SFX15. Shots `cfg_stest_num15/bgm0/bgm3/back_sfx.png`.
-3. Full regression savestate suite.
+3. ~~Full regression savestate suite~~ Done.
+   - Idle suite vs v1.1.3 (`f56777f3…`): **36/36** pixel-identical after 8 frames (`/tmp/reg16/report.json`).
+   - Expected behavioral diffs only:
+     - Title labels (LOAD/NEW/OPTIONS): ~0.4–0.9% pixel diff on title savestates.
+     - Config menu: ~5.1% diff (`cfg_new` vs `cfg_old`).
+     - L+R+X: v1.1.3 writes opts `544401a4` (turbo); dx-issue16 stays `ffffffff` (hotkeys retired).
+   - L/R shortcuts re-verified on real field states (not poked `$1430`):
+     - Ryo `ryo_field.st`: L→act 61 wall of fire, R→act 65 bombs, L+R→act 52 clones gold 100→90.
+     - Sara `horn_field.st`: L→act 49, R→act 73.
+     - Hornisse: prior `step5_horn_*` shots; no idle-horn savestate in suite this pass.
+   - Overlay Select probe on town `ryo_field` skipped (HB `$7E8000` busy; help only opens in stages). Overlay label change already covered by step4 shots — not an unintended idle-suite diff.
+   - No unintended gameplay diffs; no code fix required.
 4. Fresh SRAM defaults + v1.1.3 opts carry-over.
 5. Rebuild IPS/ROM md5s.
 6. Deploy NEW file to rivalmage (no launch).
