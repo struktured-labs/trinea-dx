@@ -63,7 +63,9 @@ Screenshots: `/workspace/issue16/impl/`
      - Hornisse: prior `step5_horn_*` shots; no idle-horn savestate in suite this pass.
    - Overlay Select probe on town `ryo_field` skipped (HB `$7E8000` busy; help only opens in stages). Overlay label change already covered by step4 shots — not an unintended idle-suite diff.
    - No unintended gameplay diffs; no code fix required.
-4. Fresh SRAM defaults + v1.1.3 opts carry-over.
+4. ~~Fresh SRAM defaults + v1.1.3 opts carry-over~~ Done.
+   - Fresh / blank / `$FF` SRAM (no `TD` block): `getopt` → opts `0` → Turbo/Fast foes/Hero Speed Off, **Rumble On**. Shot `cfg_fresh_defaults.png`.
+   - Existing v1.1.3-style block `TD` + opts `$2B` (turbo|hero Fast|foes|rumble off) + xor: carried into config UI (Turbo On, Fast foes On, Hero Speed Fast, Rumble Off). Shot `cfg_carry_v113.png`.
 5. Rebuild IPS/ROM md5s.
 6. Deploy NEW file to rivalmage (no launch).
 
