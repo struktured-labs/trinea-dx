@@ -66,7 +66,9 @@ Screenshots: `/workspace/issue16/impl/`
 4. ~~Fresh SRAM defaults + v1.1.3 opts carry-over~~ Done.
    - Fresh / blank / `$FF` SRAM (no `TD` block): `getopt` → opts `0` → Turbo/Fast foes/Hero Speed Off, **Rumble On**. Shot `cfg_fresh_defaults.png`.
    - Existing v1.1.3-style block `TD` + opts `$2B` (turbo|hero Fast|foes|rumble off) + xor: carried into config UI (Turbo On, Fast foes On, Hero Speed Fast, Rumble Off). Shot `cfg_carry_v113.png`.
-5. Rebuild IPS/ROM md5s.
+5. ~~Rebuild IPS/ROM md5s~~ Done.
+   - `build/trinea_dx.ips` md5 `d742041e0d02c399c78b43589bd1364c`
+   - `build/trinea_dx.sfc` / `rom/Trinea DX.sfc` md5 `0c0212d18d023426d898c7506010b141`
 6. Deploy NEW file to rivalmage (no launch).
 
 ## Next
