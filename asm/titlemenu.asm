@@ -237,6 +237,7 @@ title_nav:
     SEP #$20
     STA $20
     REP #$20
+    STZ $98              ; reset attract idle (DP-relative; title D=$1400 → $7E1498). Vanilla never did this on Left/Right either (CMP #$0258 / 600 frames ~10s at CE3306).
     JSR title_hl_paint
     PLB
     PLP
