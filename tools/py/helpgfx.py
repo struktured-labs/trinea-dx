@@ -97,7 +97,7 @@ def page(name,moves,btn,lr=False):
         img[oy+47:92+1,bx]=1                           # down from the button to y 92 (row 11)
         img[92,min(bx,lx):max(bx,lx)+1]=1              # across
         img[92:95,lx]=1                                # down to just above the label (row 12)
-    rich(1,14,'{L}/{R}: shortcuts'); rich(1,15,'{L+R}: rotate move')
+    rich(1,14,'{L}/{R}: shortcuts'); rich(1,15,'{L+R}: special')
     ctext(17,name+"'S MOVES",1)
     # Moves: packed one per tile row in the map (rows 18..23), then spaced out on screen at pixel level by an
     # HDMA table on BG3 vertical scroll (see help.asm), so no extra tiles are needed: 3 px under the heading,

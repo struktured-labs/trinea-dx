@@ -9,7 +9,10 @@ hirom
 ; scratch (prev buttons, feedback ticks, saved mosaic, raw pad) lives in WRAM !W+4..+11, not SRAM: SRAM is only read when
 ; the WRAM cache is invalid and only written when a toggle changes (issue #4 real-hardware hardening)
 !S = $306300
-!W = $7ECF10      ; WRAM cache/scratch (hw fix #4): +0 $A5 = cache valid, +1 opts, +2 sig valid, +3 opts^$5A (cache check), +4..+11 pad/feedback scratch, +12..+15 L/R shortcut phase (issue #16)
+!W = $7ECF10      ; WRAM cache/scratch (hw fix #4): +0 $A5 = cache valid, +1 opts, +2 sig valid, +3 opts^$5A (cache check), +4..+11 pad/feedback scratch
+                  ; +12 L/R timer, +13 L/R mode (0 idle, 1 R-debounce, 2 L-debounce, 3 Hornisse mash,
+                  ;   5 L+R commit, 6 cancel-wait, 8 firing, 9 post-fire wait). +15 facing captured at L+R press.
+                  ;   Do not use +14: $7ECF1E is rumble.asm !R_ACC (leaky bucket) and would decay the facing.
 
 ; --- main-loop tick wait (both copies): LDA $082C : CMP #$04 -> JSL turbo : NOP
 org $C00268
@@ -50,6 +53,22 @@ org $C0FF40        ; free zeros in C0 (help_wait ends at $C0FF36)
 ryo_strm:
     JSR $2FD8
     RTL
+org $C0FF44        ; still unused zeros after ryo_strm
+c0_jsr8707:
+    JSR $8707      ; native spin check must JSR from bank C0 (RTS), not from FE
+    RTL
+org $C088E0        ; was LDA #$0002 / JSR $8707 (6 bytes) — Ryo N=2
+    JSL spin_hook
+    NOP
+    NOP
+org $C086CA        ; was LDA #$0006 / JSR $8707 — Hornisse/Sara copy
+    JSL spin_hook6
+    NOP
+    NOP
+org $C087E9        ; was LDA #$0006 / JSR $8707 — Hornisse/Sara copy
+    JSL spin_hook6
+    NOP
+    NOP
 org $C004B6
     JSL ryo_nmi
     NOP
@@ -270,34 +289,159 @@ joy:
     JML $C0050C
 
 ; ---- issue #16: per-hero L/R move shortcuts (P1). Pads: $82 = B Y Sel Start U D L R, $83 = A X L R.
-; L = B+Y (Sara Star fall / Ryo Wall of fire) or Hornisse mash-B Sword frenzy; R = A+B; L+R = rotate then face btn.
-; Raw shoulders stay in !W+10; game-visible $83 always has L/R cleared. P2 would mirror on $086E/$086F after C0050C.
+; L = B+Y (Sara Star fall / Ryo Wall of fire) or Hornisse mash-B Sword frenzy; R = A+B.
+; L+R = ~0.5s commit (30 joy/NMI frames, not turbo-shortened) then the native face button, with the
+; C0:88E0 spin check bypassed. No synthetic D-pad 360. Facing $1437 is captured at L+R press and
+; restored through the delay and at fire so the special uses that direction (fixes Sara LEFT->NORTH
+; from the old sequencer ending on Up). Game-visible $83 always has L/R cleared.
+; Raw shoulders stay in !W+10; P2 would mirror on $086E/$086F after C0050C.
 lr_sc:
     PHP
     SEP #$20
     LDA $00F0
-    BNE .strip
+    BNE .to_reset             ; script/menu: drop any pending commit
     LDA $1430
-    BEQ .strip
+    BEQ .to_reset
     CMP #$04
-    BCS .strip
+    BCS .to_reset
     LDA $0083
-    AND #$30              ; L=#$20 R=#$10
+    AND #$30                  ; L=#$20 R=#$10
     CMP #$30
+    BEQ .both
+    CMP #$20
     BNE +
-    JMP lr_spin
-+   CMP #$20
-    BNE +
-    JMP lr_L
+    JMP .lonly
 +   CMP #$10
     BNE +
+    JMP .ronly
++   ; both shoulders up: idle (also ends post-fire / cancelled latch)
+    LDA #$00
+    STA.l !W+12
+    STA.l !W+13
+    JMP .strip
+.to_reset:
+    JMP .strip_reset
+
+.both:
+    LDA.l !W+13
+    CMP #$09                  ; post-fire: no repeat until both release
+    BNE +
+    JMP .strip
++   CMP #$06                  ; cancelled chord
+    BNE +
+    JMP .strip
++   CMP #$08
+    BEQ .firing
+    CMP #$05
+    BEQ .commit_tick
+    ; first frame both shoulders are down: latch facing now
+    LDA #$05
+    STA.l !W+13
+    LDA #$00
+    STA.l !W+12
+    LDA $7E1437
+    STA.l !W+15
+    JMP .commit_hold
+
+.commit_tick:
+    LDA.l !W+12
+    INC
+    STA.l !W+12
+    CMP #30                   ; ~0.50s at ~60.1 Hz NMI/joy; turbo only shortens C0:0268 logic ticks
+    BCC .commit_hold
+    LDA #$00
+    STA.l !W+12
+    LDA #$08                  ; fire: hold native face button ~8 frames (old synth did the same)
+    STA.l !W+13
+.firing:
+    LDA.l !W+12
+    CMP #8
+    BCC +
+    LDA #$09
+    STA.l !W+13
+    JMP .strip
++   INC
+    STA.l !W+12
+    LDA.l !W+15
+    STA $7E1437               ; restore facing from L+R press
+    LDA $0082
+    AND #$F0                  ; drop D-pad so movement cannot overwrite facing this frame
+    STA $0082
+    JMP lr_spin_btn
+
+.commit_hold:
+    LDA.l !W+15
+    STA $7E1437               ; keep captured facing through the half-second delay
+    LDA $0082
+    AND #$F0
+    STA $0082
+    JMP .strip
+
+.lonly:
+    LDA.l !W+13
+    CMP #$05
+    BEQ .cancel               ; dropped R during commit: no fire, no leftover L shortcut
+    CMP #$06
+    BEQ .strip
+    CMP #$08
+    BEQ .strip
+    CMP #$09
+    BEQ .strip
+    CMP #$03
+    BEQ .do_L                 ; Hornisse mash already running
+    CMP #$02
+    BEQ .ldeb_tick
+    LDA #$02
+    STA.l !W+13
+    LDA #$00
+    STA.l !W+12
+    JMP .strip
+.ldeb_tick:
+    LDA.l !W+12
+    INC
+    STA.l !W+12
+    CMP #$03                  ; ~3-frame chord debounce so a sloppy L+R does not fire L first
+    BCC .strip
+.do_L:
+    JMP lr_L
+
+.ronly:
+    LDA.l !W+13
+    CMP #$05
+    BEQ .cancel
+    CMP #$06
+    BEQ .strip
+    CMP #$08
+    BEQ .strip
+    CMP #$09
+    BEQ .strip
+    CMP #$01
+    BEQ .rdeb_tick
+    LDA #$01
+    STA.l !W+13
+    LDA #$00
+    STA.l !W+12
+    JMP .strip
+.rdeb_tick:
+    LDA.l !W+12
+    INC
+    STA.l !W+12
+    CMP #$03
+    BCC .strip
     JMP lr_R
-+   LDA #$00
+
+.cancel:
+    LDA #$06
+    STA.l !W+13
+    JMP .strip
+
+.strip_reset:
+    LDA #$00
     STA.l !W+12
     STA.l !W+13
 .strip:
     LDA $0083
-    AND #$CF              ; drop L/R so shoulders are dedicated to shortcuts
+    AND #$CF                  ; drop L/R so shoulders are dedicated to shortcuts
     STA $0083
     PLP
     RTL
@@ -361,149 +505,68 @@ lr_mash:
     PLP
     RTL
 
-lr_spin:                  ; L+R: two rotate circles then face button (reliable vs one)
-    LDA.l !W+13
-    CMP #$04
-    BEQ +
-    LDA #$00
-    STA.l !W+12           ; fresh L+R: restart
-+   LDA #$04
-    STA.l !W+13
-    LDA $1430
-    CMP #$03
-    BNE +
-    JMP lr_spin_ryo
-+   ; Hornisse/Sara: 4-on/2-off x4 dirs x2 circles = 48, then 8 button (phase 0..55)
-    LDA.l !W+12
-    INC
-    STA.l !W+12
-    DEC A
-    CMP #56
-    BCC +
-    LDA #$00
-    STA.l !W+12
-    LDA #$00
-+   PHA
-    JSR lr_spin_clear
-    PLA
-    CMP #48
-    BCC .hs_dirs
-    JMP lr_spin_btn
-.hs_dirs:
-    PHA
-    LDA #$00
-    STA.l !W+15           ; dir-step quotient
-    PLA
--   CMP #6
-    BCC .hs_sub
-    SEC
-    SBC #6
-    PHA
-    LDA.l !W+15
-    INC
-    STA.l !W+15
-    PLA
-    BRA -
-.hs_sub:
-    CMP #4                ; 0-3 hold dir, 4-5 gap
-    BCC +
-    JMP lr_spin_done      ; gap frame
-+   LDA.l !W+15
-    AND #$03
-    JMP lr_spin_dir
-
-lr_spin_ryo:              ; Ryo: 6-on/dir x4 x2 circles = 48, then 8 Y (phase 0..55).
-                          ; Spin check N=2 (~8 frames max/dir); 6f/dir hits clones, 1f only fires Y.
-    LDA.l !W+12
-    INC
-    STA.l !W+12
-    DEC A
-    CMP #56
-    BCC +
-    LDA #$00
-    STA.l !W+12
-    LDA #$00
-+   PHA
-    JSR lr_spin_clear
-    PLA
-    CMP #48
-    BCC .ry_dirs
-    JMP lr_spin_btn
-.ry_dirs:
-    PHA
-    LDA #$00
-    STA.l !W+15
-    PLA
--   CMP #6
-    BCC .ry_sub
-    SEC
-    SBC #6
-    PHA
-    LDA.l !W+15
-    INC
-    STA.l !W+15
-    PLA
-    BRA -
-.ry_sub:
-    LDA.l !W+15
-    AND #$03
-    JMP lr_spin_dir
-
-lr_spin_clear:
-    LDA $0082
-    AND #$30              ; keep real Select/Start
-    STA.l !W+14
-    STZ $0082
-    STZ $0083
-    RTS
-
-lr_spin_dir:              ; A = 0 R, 1 D, 2 L, 3 U
-    CMP #$00
-    BEQ .dr
-    CMP #$01
-    BEQ .dd
-    CMP #$02
-    BEQ .dl
-    LDA.l !W+14
-    ORA #$08
-    STA $0082
-    JMP lr_spin_done
-.dr:
-    LDA.l !W+14
-    ORA #$01
-    STA $0082
-    JMP lr_spin_done
-.dd:
-    LDA.l !W+14
-    ORA #$04
-    STA $0082
-    JMP lr_spin_done
-.dl:
-    LDA.l !W+14
-    ORA #$02
-    STA $0082
-    JMP lr_spin_done
-
-lr_spin_btn:
+lr_spin_btn:              ; inject the native rotate-move face button (no D-pad sequence)
     LDA $1430
     CMP #$01
     BEQ .ba
     CMP #$02
     BEQ .bb
-    LDA.l !W+14
+    LDA $0082
+    AND #$F0
     ORA #$40              ; Ryo Y
     STA $0082
-    JMP lr_spin_done
+    JMP .btn_done
 .ba:
-    LDA #$80              ; Hornisse A
+    LDA $0083
+    AND #$CF
+    ORA #$80              ; Hornisse A
     STA $0083
-    LDA.l !W+14
+    LDA $0082
+    AND #$F0
     STA $0082
-    JMP lr_spin_done
+    JMP .btn_done
 .bb:
-    LDA.l !W+14
+    LDA $0082
+    AND #$F0
     ORA #$80              ; Sara B
     STA $0082
-lr_spin_done:
+.btn_done:
+    LDA $0083
+    AND #$CF
+    STA $0083
+    PLP
+    RTL
+
+; Bypass C0:8707 while mode 8 (firing) so L+R does not need a 360; a real D-pad spin still uses 8707.
+spin_hook:                 ; native N=2 (Ryo)
+    PHP
+    SEP #$20
+    LDA.l !W+13
+    CMP #$08
+    BEQ spin_bypass
+    PLP
+    LDA #$0002
+    JSL c0_jsr8707
+    RTL
+spin_hook6:                ; native N=6 (Hornisse/Sara)
+    PHP
+    SEP #$20
+    LDA.l !W+13
+    CMP #$08
+    BEQ spin_bypass
+    PLP
+    LDA #$0006
+    JSL c0_jsr8707
+    RTL
+spin_bypass:
+    REP #$20
+    LDA #$0001
+    STA $1540
+    LDA #$0002
+    STA $1542
+    LDA #$0004
+    STA $1544
+    LDA #$0008
+    STA $1546
     PLP
     RTL

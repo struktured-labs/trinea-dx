@@ -50,17 +50,17 @@ Shoulder buttons synthesize the matching special for the current hero (P1). L an
 
 | Hero | L | R | L+R |
 |---|---|---|---|
-| Hornisse | mash B (Sword frenzy) | A+B (Morning star) | rotate then A (Lightning) |
-| Sara | B+Y (Star fall) | A+B (Homing flame) | rotate then B (Dragon Fire) |
-| Ryo | B+Y (Wall of fire) | A+B (Bombs) | fast rotate then Y (Shadow clones) |
+| Hornisse | mash B (Sword frenzy) | A+B (Morning star) | hold L+R ~0.5s (Lightning) |
+| Sara | B+Y (Star fall) | A+B (Homing flame) | hold L+R ~0.5s (Dragon Fire) |
+| Ryo | B+Y (Wall of fire) | A+B (Bombs) | hold L+R ~0.5s (Shadow clones) |
 
-Hold L/R (or both) in the field or a stage. L+R plays two full D-pad circles then the face button so the stock spin check accepts it.
+Hold L/R (or both) in the field or a stage. L+R waits about half a second (30 joy/NMI frames, not shortened by Turbo) then fires the rotate special directly: no synthetic D-pad 360. Releasing either shoulder before that window cancels; the leftover shoulder does not fire L or R. The special uses the facing from the moment L+R went down (Sara Dragon Fire no longer turns to north because a fake spin ended on Up). Manual rotate-then-button input is unchanged.
 
 ## DX options (Configuration menu)
 Turbo, Fast foes, Hero Speed, and Rumble are toggled in the **Configuration** menu (title OPTIONS, or Select on the title). The old field L+R+button hotkeys are retired. Settings stay in battery SRAM ($30:6300); defaults are off (rumble itself is on until you turn it off).
 
 ## Select: controls help
-Press **Select** in the field or a stage (anywhere Start would pause) to freeze the game and show a full-screen page: an SNES pad with what each button does (including the L/R shortcuts above), plus the current character's moves from this file. Tip line: `{L}/{R}: shortcuts` / `{L+R}: rotate move`. **Select or Start** closes it and the screen comes back exactly as it was (the music keeps playing). It never opens in menus, shops, dialogue, cutscenes or the attract demo. It is always available (no off switch). In the original game Select does nothing in play, so nothing is taken away. Screenshots: `docs/screenshots/help_overlay_*.png`.
+Press **Select** in the field or a stage (anywhere Start would pause) to freeze the game and show a full-screen page: an SNES pad with what each button does (including the L/R shortcuts above), plus the current character's moves from this file. Tip line: `{L}/{R}: shortcuts` / `{L+R}: special`. **Select or Start** closes it and the screen comes back exactly as it was (the music keeps playing). It never opens in menus, shops, dialogue, cutscenes or the attract demo. It is always available (no off switch). In the original game Select does nothing in play, so nothing is taken away. Screenshots: `docs/screenshots/help_overlay_*.png`.
 
 ## Start skips dialogue
 While a message is printing or waiting for A, press **Start** to skip the rest of the current scene's text (a press while text is still printing takes effect at the next prompt, so menus such as the save list always draw in full). The script still runs every non-text command (story flags, map moves, items, LIFE, character branches, battles), so nothing is missed; only the text is hidden and [wait] prompts are passed. Choice prompts and menus still appear and wait for you. Start = pause in gameplay is unchanged (skip only acts while a script is running). It is always available (no toggle since v1.1.1).

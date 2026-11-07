@@ -113,7 +113,7 @@ Editing the translation:
 - **Hornisse:** A/B/Y normals; mash B for the sword frenzy; A+B morning star; rotate the D-pad then A for lightning ("Electric Buffalo").
 - **Sara:** rotate then B for Dragon Fire; B+Y star fall; A+B homing flame.
 - **Ryo:** rotate fast then Y for shadow clones; B+Y wall of fire; A+B bombs.
-- **L/R shortcuts:** L/R (and L+R for rotate moves) fire each hero's specials — Hornisse mash-B frenzy / morning star / lightning; Sara star fall / homing flame / Dragon Fire; Ryo wall of fire / bombs / shadow clones.
+- **L/R shortcuts:** L/R (and hold L+R ~0.5s for rotate moves) fire each hero's specials — Hornisse mash-B frenzy / morning star / lightning; Sara star fall / homing flame / Dragon Fire; Ryo wall of fire / bombs / shadow clones. L+R no longer plays a synthetic D-pad 360; the special uses the facing at press.
 - **Toggles:** Configuration menu (title OPTIONS): Turbo, Fast foes, Hero Speed, Rumble. Field L+R+button hotkeys are retired. Defaults off except rumble (on until turned off). Select help overlay is always on.
 - **Select = controls help:** in the field or a stage, Select shows a pad diagram with button actions (incl. L/R shortcuts) and the character's moves; Select or Start closes it (see docs/MOVES.md).
 - **Start skips dialogue:** press Start while text is showing to skip the rest of the scene's text; flags, map moves and battles still happen.
