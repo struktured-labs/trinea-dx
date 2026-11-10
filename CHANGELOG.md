@@ -3,7 +3,8 @@
 ## Unreleased (issue #16)
 - Fixed: moving the title cursor (Up/Down/Left/Right) did not reset the vanilla 600-frame attract idle ($7E1498). Navigating toward OPTIONS near that ~10s timeout could start the demo; activity now restarts the timer. Genuine idle attract is unchanged.
 - Title menu: LOAD GAME / NEW GAME / OPTIONS (was CONTINUE/START); Start on OPTIONS opens Configuration.
-- Configuration menu: Turbo, Fast foes, Hero Speed, Rumble rows (plus nested Sound Test); opts persist in SRAM $30:6300.
+- Configuration menu: Turbo, Fast foes, Hero Speed, Rumble, Shortcuts rows (plus nested Sound Test); opts persist in SRAM $30:6300.
+- Shortcuts option (default On) can turn off all DX L/R hero shortcuts (single L, single R, and L+R). Off restores original shoulder input: no injected specials and no gold spent. Stored at $30:6304 ($01=Off; $00/$FF/absent=On) so old saves and fresh SRAM stay On, without touching the $6302 opts bits, $7ECF1E, or $7ECF1F.
 - Retired field L+R+button DX option hotkeys; Select overlay no longer swaps to "L+R: DX opts".
 - Per-hero L/R move shortcuts (P1): L/R synthesize specials; L+R plays the rotate move. Hornisse L = mash Sword Frenzy.
 - L+R now fires the rotate special directly after a ~0.5s commit window (30 joy/NMI frames, not Turbo-shortened). The synthetic D-pad 360 is gone; native spin-then-button input is unchanged. Releasing a shoulder during the window cancels and will not fire L or R from that chord.

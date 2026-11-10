@@ -1,5 +1,5 @@
 ; Issue #16 step 3 — Configuration menu DX rows.
-; Rows: Exit, Play Level, Sound Mode, Turbo, Fast foes, Hero Speed, Rumble, Sound Test.
+; Rows: Exit, Play Level, Sound Mode, Turbo, Fast foes, Hero Speed, Rumble, Shortcuts, Sound Test.
 ; Sound Effects + Music Play nested under Sound Test (A toggles SFX↔BGM).
 ; Opts via getopt/setopt (FE:0200). Code in EB; thin D9 stubs for JSR $9A22/$9A9B/$922F.
 
@@ -9,7 +9,7 @@
 !CFG_DIFF   = $10BF
 !CFG_STEREO = $0438
 !CFG_MODE   = $7ECF32       ; 0=SFX on Sound Test, 1=BGM
-!CFG_MAX    = $07
+!CFG_MAX    = $08
 
 ; -------------------- hooks in D9 --------------------
 org $D9913C
@@ -41,6 +41,7 @@ cfg_str_turbo:      db "Turbo$"
 cfg_str_fastfoes:   db "Fast foes$"
 cfg_str_herospeed:  db "Hero Speed$"
 cfg_str_rumble:     db "Rumble$"
+cfg_str_shortcuts:  db "Shortcuts$"
 cfg_str_soundtest:  db "Sound Test$"
 cfg_str_off:        db "Off   $"
 cfg_str_on:         db "On    $"
@@ -70,6 +71,7 @@ org $D99F6E                 ; id $30..$32 (replace SE/MP/blank labels)
 org $D99FAE                 ; id $50
     dw cfg_str_rumble
     dw cfg_str_soundtest
+    dw cfg_str_shortcuts      ; id $52
 
 org $D99F8E                 ; id $40..$46 value strings (past music ids)
     dw cfg_str_off
@@ -115,6 +117,7 @@ cfg_draw:
     STA $16B5
     STA $16B7
     STA $16B9
+    STA $16BB
     LDA.l !CFG_IDX
     AND #$00FF
     ASL
@@ -134,77 +137,86 @@ cfg_draw:
     JSL cfg_jsr_print
     ; Play Level + diff
     LDA #$29
-    LDX #$030A
+    LDX #$02CA
     LDY $16AD
     JSL cfg_jsr_print
     LDA.l !CFG_DIFF
     CLC
     ADC #$2A
-    LDX #$032C
+    LDX #$02EC
     LDY #$0003
     JSL cfg_jsr_print
     ; Sound Mode + stereo
     LDA #$2D
-    LDX #$038A
+    LDX #$030A
     LDY $16AF
     JSL cfg_jsr_print
     LDA.w !CFG_STEREO
     CLC
     ADC #$2E
-    LDX #$03AC
+    LDX #$032C
     LDY #$0003
     JSL cfg_jsr_print
-    ; Turbo + value
+    ; Turbo + value  (8 px rows from here so 9 items still fit in the window)
     LDA #$30
-    LDX #$040A
+    LDX #$034A
     LDY $16B1
     JSL cfg_jsr_print
     JSL cfg_val_turbo
-    LDX #$042C
+    LDX #$036C
     LDY #$0003
     JSL cfg_jsr_print
     ; Fast foes
     LDA #$31
-    LDX #$048A
+    LDX #$038A
     LDY $16B3
     JSL cfg_jsr_print
     JSL cfg_val_foes
-    LDX #$04AC
+    LDX #$03AC
     LDY #$0003
     JSL cfg_jsr_print
     ; Hero Speed
     LDA #$32
-    LDX #$050A
+    LDX #$03CA
     LDY $16B5
     JSL cfg_jsr_print
     JSL cfg_val_hero
-    LDX #$052C
+    LDX #$03EC
     LDY #$0003
     JSL cfg_jsr_print
     ; Rumble
     LDA #$50
-    LDX #$058A
+    LDX #$040A
     LDY $16B7
     JSL cfg_jsr_print
     JSL cfg_val_rumble
-    LDX #$05AC
+    LDX #$042C
+    LDY #$0003
+    JSL cfg_jsr_print
+    ; Shortcuts (id $52)
+    LDA #$52
+    LDX #$044A
+    LDY $16B9
+    JSL cfg_jsr_print
+    JSL cfg_val_shortcuts
+    LDX #$046C
     LDY #$0003
     JSL cfg_jsr_print
     ; Sound Test label + SFX/BGM prefix + number (via D9 stub → $9A9B)
     LDA #$51
-    LDX #$060A
-    LDY $16B9
+    LDX #$048A
+    LDY $16BB
     JSL cfg_jsr_print
     JSL cfg_val_soundtest
-    LDX #$062C
+    LDX #$04AC
     LDY #$0003
     JSL cfg_jsr_print
     ; number field after prefix (gap so "SFX"/"BGM" stay intact)
-    ; blank $0634..$0638: $9A9B writes right-to-left and skips leading zeros,
+    ; blank $04B4..$04B8: $9A9B writes right-to-left and skips leading zeros,
     ; so tens/hundreds tiles go stale unless cleared first
     SEP #$20
     LDA #$46                ; blank 3 tiles
-    LDX #$0634
+    LDX #$04B4
     LDY #$0003
     JSL cfg_jsr_print
     REP #$20
@@ -216,7 +228,7 @@ cfg_draw:
 +   LDA.w !CFG_BGM
 ++  AND #$00FF
     LDY #$0003
-    LDX #$0638
+    LDX #$04B8
     JSL cfg_jsr_num
     SEP #$20
     PLY
@@ -267,6 +279,15 @@ cfg_val_rumble:
     LDA #$41
     RTL
 
+cfg_val_shortcuts:
+    JSL getsc
+    BNE .off
+    LDA #$41              ; On (default)
+    RTL
+.off:
+    LDA #$40              ; Off
+    RTL
+
 cfg_val_soundtest:
     LDA.l !CFG_MODE
     BNE +
@@ -294,7 +315,12 @@ cfg_right:
     CMP #$06
     BEQ .rumble
     CMP #$07
-    BEQ .stest
+    BNE +
+    JMP .shortcuts
++   CMP #$08
+    BNE +
+    JMP .stest
++
 .none:
     PLP
     JML $D990A6
@@ -350,6 +376,13 @@ cfg_right:
     JSL cfg_jsr_refresh
     PLP
     JML $D990A6
+.shortcuts:
+    JSL getsc
+    EOR #$01
+    JSL setsc
+    JSL cfg_jsr_refresh
+    PLP
+    JML $D990A6
 .stest:
     LDA.l !CFG_MODE
     BNE .st_bgm
@@ -394,7 +427,12 @@ cfg_left:
     CMP #$06
     BEQ .rumble
     CMP #$07
-    BEQ .stest
+    BNE +
+    JMP .shortcuts
++   CMP #$08
+    BNE +
+    JMP .stest
++
 .none:
     PLP
     JML $D990A6
@@ -448,6 +486,13 @@ cfg_left:
     JSL cfg_jsr_refresh
     PLP
     JML $D990A6
+.shortcuts:
+    JSL getsc
+    EOR #$01
+    JSL setsc
+    JSL cfg_jsr_refresh
+    PLP
+    JML $D990A6
 .stest:
     LDA.l !CFG_MODE
     BNE .st_bgm
@@ -478,7 +523,7 @@ cfg_confirm:
     SEP #$20
     LDA.l !CFG_IDX
     BEQ .exit
-    CMP #$07
+    CMP #$08
     BEQ .stest_a
     ; other rows (incl. former 3/4): soft-beep path
     JML $D990A6

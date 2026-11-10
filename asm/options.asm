@@ -6,6 +6,9 @@ hirom
 ;   bit5 rumble off (read by asm/rumble.asm rum_muted), bit6 RETIRED (was Start-skips-dialogue off via L+R+Select;
 ;   ignored and never written by a toggle, so saves that set it still skip),
 ;   bit7 RETIRED (was Select help overlay off via L+R+Start; ignored so saves that set it still get the overlay)
+;   $6304 shortcuts: $01 = L/R shortcuts OFF (original shoulder input); any other value (incl. $00/$FF,
+;   blank, or old saves that never wrote this byte) = ON. Not packed into $6302 so retired option bits
+;   in old saves cannot turn shortcuts off. Does not touch $7ECF1E (rumble) or $7ECF1F (L+R facing).
 ; scratch (prev buttons, feedback ticks, saved mosaic, raw pad) lives in WRAM !W+4..+11, not SRAM: SRAM is only read when
 ; the WRAM cache is invalid and only written when a toggle changes (issue #4 real-hardware hardening)
 !S = $306300
@@ -132,6 +135,21 @@ setopt:            ; A8 in/out: A = opts to store. Writes SRAM signature + opts,
     LDA #$A5
     STA.l !W
     LDA.l !W+1
+    RTL
+
+getsc:             ; A8 in/out: A = 1 if L/R shortcuts are OFF, else 0.
+    LDA.l !S+4       ; $01 is the only OFF sentinel, so $00/$FF/garbage and pre-toggle saves stay ON
+    CMP #$01
+    BEQ .off
+    LDA #$00
+    RTL
+.off:
+    LDA #$01
+    RTL
+
+setsc:             ; A8 in: A = 0 (ON) or 1 (OFF). Writes only $6304; does not alter the TD opts block.
+    AND #$01
+    STA.l !S+4
     RTL
 
 turbo:             ; A8; returns carry = ($082C >= threshold)
@@ -295,9 +313,19 @@ joy:
 ; restored through the delay and at fire so the special uses that direction (fixes Sara LEFT->NORTH
 ; from the old sequencer ending on Up). Game-visible $83 always has L/R cleared.
 ; Raw shoulders stay in !W+10; P2 would mirror on $086E/$086F after C0050C.
+; Configuration "Shortcuts" OFF ($6304=$01): skip all of this and leave $82/$83 as the raw pad so
+; L/R do exactly what they did in the original game (no injected specials, no gold spent).
 lr_sc:
     PHP
     SEP #$20
+    JSL getsc
+    BEQ .go
+    LDA #$00
+    STA.l !W+12
+    STA.l !W+13
+    PLP
+    RTL
+.go:
     LDA $00F0
     BNE .to_reset             ; script/menu: drop any pending commit
     LDA $1430

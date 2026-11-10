@@ -13,7 +13,7 @@
 ;  - BGMODE/BG3SC/BG34NBA/W34SEL ($2105/$2109/$210C/$2124) are write-only and the game has no shadows for them,
 ;    so every write site the game has gets a tiny trampoline that also stores the value in SRAM (see bottom).
 !H   = $7ECF30   ; WRAM: +0 prev Select, +10.. state saved while the overlay is open
-!HS  = $306310   ; battery SRAM (2 KB; slots $6000-62FF, DX options $6300-6303): shadows +0 $2105, +2 $2109,
+!HS  = $306310   ; battery SRAM (2 KB; slots $6000-62FF, DX options $6300-6304): shadows +0 $2105, +2 $2109,
                  ; +4 $210C, +6 $2124 (16-bit spaced). Not WRAM: the game zeroes $7E:2000-FFFF on New Game
                  ; (C0:4C86) after the PPU set-up, so WRAM shadows would be lost; SRAM survives that and resets
 !HB  = $7E8000   ; 4 KB save buffer (must be zero; zeroed again on close)
