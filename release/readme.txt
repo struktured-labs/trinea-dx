@@ -1,5 +1,5 @@
 ===============================================================================
-                    TRINEA DX v1.1.3 - English Translation + DX
+                    TRINEA DX v1.2.0 - English Translation + DX
                           by struktured labs
 ===============================================================================
 
@@ -7,8 +7,8 @@ Game:          Trinea
 Platform:      Super Nintendo / Super Famicom
 Genre:         Action RPG
 Original:      Yanoman / Japan Art Media (JAM), 1993 (Japan only)
-Patch version: 1.1.3
-Release date:  2026-11-01
+Patch version: 1.2.0
+Release date:  2026-11-10
 Status:        Complete
 Project:       Trinea DX (enhancement project; v1.0 = English translation)
 Source:        https://github.com/struktured/trinea-dx
@@ -38,15 +38,18 @@ the entire game into English:
  - The character select screen, shop descriptions and messages, and the
    money label.
  - A new variable-width dialogue font and additions to the 8x8 small font.
- - DX extras (v1.1.3): less of the original game's slowdown in some
-   scenes, in-game L+R+button toggles (turbo, faster monsters, hero speed,
-   rumble off), RumbleShock rumble, a Select controls overlay, Start to
-   skip dialogue, and a boot splash. Every toggle can be switched off; the
-   overlay only appears when you press Select, and Start skips dialogue
-   only when you press it.
+ - DX extras (v1.2.0): less of the original game's slowdown in some
+   scenes; a title LOAD GAME / NEW GAME / OPTIONS menu; a Configuration
+   menu (Turbo, Fast foes, Hero Speed, Rumble, Shortcuts, plus a nested
+   Sound Test); per-hero L/R move shortcuts (optional; off restores the
+   original shoulder buttons); RumbleShock rumble; a Select controls
+   overlay; Start to skip dialogue; and a boot splash. Every toggle can
+   be switched off; the overlay only appears when you press Select, and
+   Start skips dialogue only when you press it.
  - The ROM is expanded to 32 Mbit (4 MB HiROM) with a valid checksum.
 
-Tested with a full playthrough on MiSTer, and on a real SNES Jr.
+This build was hardware-tested on MiSTer. Earlier versions were played
+through on MiSTer.
 
 -------------------------------------------------------------------------------
  2. ROM INFORMATION
@@ -62,9 +65,9 @@ Apply the patch to this ROM (No-Intro), headerless:
 After patching:
 
   Size:   4,194,304 bytes (32 Mbit)
-  CRC32:  EFCA74A5
-  MD5:    F56777F39FAF9BD73BB3FB5DFA8DDBEB
-  SHA-1:  D1A709055D931AEA6D9CE6392D8C34FEF5142EB1
+  CRC32:  A6D2ECBE
+  MD5:    979E07E0487F9D1AC4E7443B3D67BFD5
+  SHA-1:  AE8F921CC8066728DB717DF941C2603FD6B7BAFF
 
 -------------------------------------------------------------------------------
  3. HOW TO APPLY THE PATCH
@@ -72,7 +75,7 @@ After patching:
  1. Make a backup copy of your ROM and check it against the hashes above.
     If your file is 2,097,664 bytes, it has a copier header. Remove the
     header first.
- 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.1.3].ips" with an IPS
+ 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.2.0].ips" with an IPS
     patcher, for example:
       - Floating IPS (Flips)   https://github.com/Alcaro/Flips
       - ROM Patcher JS (web)   https://www.marcrobledo.com/RomPatcher.js/
@@ -90,21 +93,41 @@ soft-patching. The patched game is a plain 32 Mbit HiROM with no special chips.
  4. CONTROLS AND OPTIONS
 -------------------------------------------------------------------------------
  Select   In the field or a stage, shows a pad diagram with button actions
-          and your hero's moves (Hornisse blue, Sara green, Ryo pink).
-          Press Select or Start to close it. Hold L+R while it is open to
-          see the DX option buttons.
- Start    While text is showing, skips the rest of the scene's dialogue
-          from the next prompt on, always. L+R+Start is a plain Start (pause).
-          Story flags, map moves and battles still happen.
+          (including L/R shortcuts) and your hero's moves (Hornisse blue,
+          Sara green, Ryo pink). Press Select or Start to close it.
+ Start    On the title screen, confirms LOAD GAME / NEW GAME / OPTIONS.
+          On OPTIONS it opens Configuration. While text is showing, skips
+          the rest of the scene's dialogue from the next prompt on, always.
+          L+R+Start is a plain Start (pause). Story flags, map moves and
+          battles still happen.
 
- Option toggles (no menu): in the field, hold L+R, then tap a button:
-   X       Turbo                     (default off)
-   Y       Hero speed                (default off)
-           Works for any hero, but it is mainly there to bring
-           Sara up to the speed she had in the Game Boy version.
-   A       Faster monsters           (default off)
-   B       Rumble off                (rumble is on by default)
- Two blinks mean on, one blink means off. Settings are saved in SRAM.
+ Title menu: LOAD GAME / NEW GAME / OPTIONS. Start (or Select) on OPTIONS
+ opens Configuration. Moving the title cursor resets the ~10s attract
+ idle timer, so you can walk down to OPTIONS without the demo starting.
+
+ Configuration (saved in SRAM):
+   Turbo
+   Fast foes
+   Hero Speed   Works for any hero, but it is mainly there to bring
+                Sara up to the speed she had in the Game Boy version.
+   Rumble       On by default.
+   Shortcuts    On by default. Off disables all DX L/R hero shortcuts
+                (single L, single R, and L+R) and restores original
+                shoulder input: no injected specials and no gold spent.
+   Sound Test   Nested under Configuration.
+ The old field L+R+button DX option hotkeys are retired.
+
+ L/R shortcuts (when Shortcuts is On):
+   L / R fire each hero's specials:
+     Hornisse: L = mash Sword Frenzy (original buildup, not instant),
+               R = morning star
+     Sara:     L = star fall, R = homing flame
+     Ryo:      L = wall of fire, R = bombs
+   Hold L+R about 0.5 seconds to fire the rotate special in the facing
+   you had when you pressed them (Hornisse lightning, Sara Dragon Fire,
+   Ryo shadow clones). Release either shoulder during that window to
+   cancel; that chord will not fire L or R. Original gold costs still
+   apply. Native spin-then-button input is unchanged.
 
  Moves (full list in docs/MOVES.md in the source repository):
  - X special: only X spends it. You start with 1 and can hold up to 5.
@@ -164,6 +187,19 @@ holders.
 -------------------------------------------------------------------------------
  8. CHANGELOG
 -------------------------------------------------------------------------------
+ v1.2.0 (2026-11-10)
+   - Title menu is now LOAD GAME / NEW GAME / OPTIONS. Start on OPTIONS
+     opens Configuration (Turbo, Fast foes, Hero Speed, Rumble,
+     Shortcuts, plus a nested Sound Test). Settings still save in SRAM.
+   - Field L+R+button DX option hotkeys are retired. L/R are per-hero
+     move shortcuts when Shortcuts is On (the default). Off restores
+     original shoulder input and spends no gold. Suggested in issue #16
+     (eadmaster).
+   - L+R fires the rotate special after about 0.5s and keeps the facing
+     you had when you pressed them. Release either shoulder during that
+     window to cancel.
+   - Fixed: moving the title cursor did not reset the ~10s attract idle
+     timer, so walking down to OPTIONS could start the demo.
  v1.1.3 (2026-11-01)
    - Fixed: Play Level Easy (hidden Configuration menu: press Select on
      CONTINUE/START at the title) was reversed. Easy now deals Normal

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (issue #16)
+## v1.2.0 (2026-11-10)
 - Fixed: moving the title cursor (Up/Down/Left/Right) did not reset the vanilla 600-frame attract idle ($7E1498). Navigating toward OPTIONS near that ~10s timeout could start the demo; activity now restarts the timer. Genuine idle attract is unchanged.
 - Title menu: LOAD GAME / NEW GAME / OPTIONS (was CONTINUE/START); Start on OPTIONS opens Configuration.
 - Configuration menu: Turbo, Fast foes, Hero Speed, Rumble, Shortcuts rows (plus nested Sound Test); opts persist in SRAM $30:6300.

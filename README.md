@@ -121,8 +121,8 @@ Editing the translation:
 
 ## Roadmap
 
-- **Next (issue #16, unreleased):** title LOAD GAME / NEW GAME / OPTIONS; Configuration menu hosts Turbo / Fast foes / Hero Speed / Rumble / Shortcuts; field L+R+button DX hotkeys retired; L/R are per-hero move shortcuts (can be turned off).
-- **v1.1.3 (latest release):** Play Level Easy fixed (Easy now deals Normal damage and takes half damage, min 1; Hard's doubled damage capped at 255; [#13](https://github.com/struktured/trinea-dx/issues/13)), hero speed now works for Ryo ([#15](https://github.com/struktured/trinea-dx/issues/15)), and the overlay says Ryo's clone spin is fast.
+- **v1.2.0 (latest release):** title LOAD GAME / NEW GAME / OPTIONS; Configuration menu hosts Turbo / Fast foes / Hero Speed / Rumble / Shortcuts; field L+R+button DX hotkeys retired; L/R are per-hero move shortcuts (can be turned off); L+R fires the rotate special after ~0.5s and keeps the facing from press; title cursor movement resets the attract timer ([#16](https://github.com/struktured/trinea-dx/issues/16)).
+- **v1.1.3:** Play Level Easy fixed (Easy now deals Normal damage and takes half damage, min 1; Hard's doubled damage capped at 255; [#13](https://github.com/struktured/trinea-dx/issues/13)), hero speed now works for Ryo ([#15](https://github.com/struktured/trinea-dx/issues/15)), and the overlay says Ryo's clone spin is fast.
 - **v1.1.2:** fixes the Select controls overlay text being shifted/wavy in stages with BG3 scroll HDMA (e.g. Neo Edo, [#12](https://github.com/struktured/trinea-dx/issues/12)).
 - **v1.1.1:** removed the L+R+Select dialogue-skip toggle; Start always skips dialogue.
 - **v1.1:** Trinea DX: speed improvements, L+R+button option toggles, rumble, Select controls overlay,
