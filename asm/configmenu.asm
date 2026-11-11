@@ -45,11 +45,11 @@ org $D990BA
 
 ; D9 stubs so EB can call bank-D9 subroutines
 org $D9B010
-cfg_str_turbo:      db "Turbo$"
+cfg_str_turbo:      db "Game Speed$"       ; was "Turbo" (eadmaster, #18)
 cfg_str_fastfoes:   db "Fast foes$"
 cfg_str_herospeed:  db "Hero Speed$"
 cfg_str_rumble:     db "Rumble$"
-cfg_str_shortcuts:  db "Shortcuts$"
+cfg_str_shortcuts:  db "L/R Shortcuts$"    ; was "Shortcuts" (eadmaster, #18)
 cfg_str_soundtest:  db "Sound Test$"
 cfg_str_off:        db "Off   $"
 cfg_str_on:         db "On    $"
@@ -68,6 +68,38 @@ cfg_jsr_num:                ; A=value (16-bit in), X=tile, Y=digits
 cfg_jsr_refresh:            ; redraw via vanilla $922F (colors+draw+cursor sprite)
     JSR $922F
     RTL
+cfg_str_spd_normal: db "Normal$"           ; Game Speed values (no free string ids:
+cfg_str_spd_turbo:  db "Turbo $"           ;  $47-$4F music names, $53/$54 copyright)
+; Game Speed value at $036C: Turbo bit (opts bit0) clear -> "Normal", set -> "Turbo".
+; Prints from a direct pointer by entering $9A22's loop at $9A4D with its exact frame
+; (PHP/PHB/PHX/PHY pushed, $00 = palette bits, DB = $D9, X = tile offset, Y = string).
+cfg_print_speed:
+    PHP
+    SEP #$20
+    REP #$10
+    JSL getopt
+    LDY.w #cfg_str_spd_normal
+    AND #$01
+    BEQ +
+    LDY.w #cfg_str_spd_turbo
++   LDX #$036C
+    JSR cfg_print_ptr
+    PLP
+    RTL
+cfg_print_ptr:              ; X = tile, Y = string ptr (bank D9), color 3
+    PHP
+    PHB
+    PHX
+    PHY
+    REP #$20
+    STX $02
+    LDA #$0C00              ; color 3 << 10, as $9A22 builds for Y=3
+    STA $00
+    SEP #$20
+    LDA #$D9
+    PHA
+    PLB
+    JMP $9A4D               ; vanilla loop; exits via PLY/PLX/PLB/PLP/RTS at $9A96
 cfg_loop_stub:              ; one call per config frame
     JSL cfg_hdma_on
     JMP $9058
@@ -238,10 +270,7 @@ cfg_draw:
     LDX #$034A
     LDY $16B1
     JSL cfg_jsr_print
-    JSL cfg_val_turbo
-    LDX #$036C
-    LDY #$0003
-    JSL cfg_jsr_print
+    JSL cfg_print_speed     ; "Normal" / "Turbo"
     ; Fast foes
     LDA #$31
     LDX #$038A
