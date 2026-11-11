@@ -35,6 +35,14 @@ org $D99035
     JSL cfg_init
     NOP #2                  ; was STZ $168A / STZ $168C (6 bytes)
 
+; 1px line spacing (eadmaster, #16): per-frame HDMA re-arm in the config loop,
+; and switch it off only after the exit fade-out.
+org $D99047
+    JSR cfg_loop_stub       ; was JSR $9058 (BRA $9047 follows, unchanged)
+
+org $D990BA
+    JSR cfg_exit_stub       ; was JSR $9320 (fade out)
+
 ; D9 stubs so EB can call bank-D9 subroutines
 org $D9B010
 cfg_str_turbo:      db "Turbo$"
@@ -60,6 +68,13 @@ cfg_jsr_num:                ; A=value (16-bit in), X=tile, Y=digits
 cfg_jsr_refresh:            ; redraw via vanilla $922F (colors+draw+cursor sprite)
     JSR $922F
     RTL
+cfg_loop_stub:              ; one call per config frame
+    JSL cfg_hdma_on
+    JMP $9058
+cfg_exit_stub:
+    JSR $9320               ; vanilla fade-out (spacing stays during the fade)
+    JSL cfg_hdma_off
+    RTS
 
 ; String ID pointer table: id $30..$34 labels, $40..$45 values
 org $D99F6E                 ; id $30..$32 (replace SE/MP/blank labels)
@@ -94,8 +109,69 @@ cfg_init:
     STZ.w !CFG_BGM+1
     LDA #$00
     STA.l !CFG_MODE
+    JSL cfg_hdma_on         ; spacing on before the fade-in
     PLP
     RTL
+
+; ---- 1px line spacing between config rows (issue #16, eadmaster) ----
+; BG3 holds only the menu text (tilemap rows 10..18, 8px apart, glyphs use all 8 lines).
+; HDMA channel 6 writes BG3VOFS per scanline: row i is drawn i px lower (block lifted 2px
+; to stay centered in the window), and the 1 line between rows points at blank map line 0.
+; Channel 6 is free on this screen (NMI DMA uses 0 and 4, HDMA shadow $0831 is 0 here).
+!CFG_HCH = $40              ; $0831 / $420C bit for channel 6
+
+cfg_hdma_on:
+    PHP
+    SEP #$20
+    LDA #$02                ; mode 2: two writes to one register
+    STA.l $004360
+    LDA #$12                ; BG3VOFS
+    STA.l $004361
+    LDA.b #cfg_vofs_tbl
+    STA.l $004362
+    LDA.b #cfg_vofs_tbl>>8
+    STA.l $004363
+    LDA.b #cfg_vofs_tbl>>16
+    STA.l $004364
+    LDA.l $000831           ; NMI copies this shadow to $420C
+    ORA #!CFG_HCH
+    STA.l $000831
+    PLP
+    RTL
+
+cfg_hdma_off:
+    PHP
+    SEP #$20
+    LDA.l $000831
+    AND.b #!CFG_HCH^$FF
+    STA.l $000831
+    PLP
+    RTL
+
+; lines, BG3VOFS. The PPU shows map line y+VOFS+1 on screen line y, so with the 77-line
+; lead-in row i (map line 80+8i) lands on y=77+9i and each gap line shows blank map line 0.
+; (Comments below give the HDMA line where each entry starts.)
+cfg_vofs_tbl:
+    db 77 : dw $0000
+    db 8 : dw $0002     ; Exit        y=78
+    db 1 : dw $03AA     ; gap y=86
+    db 8 : dw $0001     ; Play Level  y=87
+    db 1 : dw $03A1     ; gap y=95
+    db 8 : dw $0000     ; Sound Mode  y=96
+    db 1 : dw $0398     ; gap y=104
+    db 8 : dw $03FF     ; Turbo       y=105
+    db 1 : dw $038F     ; gap y=113
+    db 8 : dw $03FE     ; Fast foes   y=114
+    db 1 : dw $0386     ; gap y=122
+    db 8 : dw $03FD     ; Hero Speed  y=123
+    db 1 : dw $037D     ; gap y=131
+    db 8 : dw $03FC     ; Rumble      y=132
+    db 1 : dw $0374     ; gap y=140
+    db 8 : dw $03FB     ; Shortcuts   y=141
+    db 1 : dw $036B     ; gap y=149
+    db 8 : dw $03FA     ; Sound Test  y=150
+    db 1 : dw $0000
+    db 0
 
 cfg_draw:
     PHP
