@@ -14,7 +14,8 @@ hirom
 !S = $306300
 !W = $7ECF10      ; WRAM cache/scratch (hw fix #4): +0 $A5 = cache valid, +1 opts, +2 sig valid, +3 opts^$5A (cache check), +4..+11 pad/feedback scratch
                   ; +12 L/R timer, +13 L/R mode (0 idle, 1 R-debounce, 2 L-debounce, 3 Hornisse mash,
-                  ;   5 L+R commit, 6 cancel-wait, 8 firing, 9 post-fire wait). +15 facing captured at L+R press.
+                  ;   4 R-pulse, 5 L+R commit, 6 cancel-wait, 7 L-pulse, 8 L+R firing, 9 post-fire wait).
+                  ;   +15 facing captured at L+R press.
                   ;   Do not use +14: $7ECF1E is rumble.asm !R_ACC (leaky bucket) and would decay the facing.
 
 ; --- main-loop tick wait (both copies): LDA $082C : CMP #$04 -> JSL turbo : NOP
@@ -342,11 +343,8 @@ lr_sc:
 +   CMP #$10
     BNE +
     JMP .ronly
-+   ; both shoulders up: idle (also ends post-fire / cancelled latch)
-    LDA #$00
-    STA.l !W+12
-    STA.l !W+13
-    JMP .strip
++   ; both shoulders up: finish a pending single tap, else idle
+    JMP .released
 .to_reset:
     JMP .strip_reset
 
@@ -362,7 +360,16 @@ lr_sc:
     BEQ .firing
     CMP #$05
     BEQ .commit_tick
-    ; first frame both shoulders are down: latch facing now
+    CMP #$04                  ; single already firing: do not also start L+R
+    BNE +
+    JMP .strip
++   CMP #$07
+    BNE +
+    JMP .strip
++   CMP #$03
+    BNE +
+    JMP .strip
++   ; first frame both shoulders are down (or debounce upgraded to a chord): latch facing now
     LDA #$05
     STA.l !W+13
     LDA #$00
@@ -405,18 +412,69 @@ lr_sc:
     STA $0082
     JMP .strip
 
+; Release with no other shoulder: a brief L or R tap that never reached the
+; 3-frame chord window still fires once. The synthetic combo is held for 8
+; frames (same length as the L+R face-button pulse) so the game can see it
+; after the physical shoulder is already up. L+R commit/cancel timing is
+; unchanged: releasing from mode 5/6/8/9 never becomes a single shortcut.
+.released:
+    LDA.l !W+13
+    CMP #$01
+    BEQ .tap_R                ; R debounce: fire on release
+    CMP #$02
+    BEQ .tap_L
+    CMP #$04
+    BEQ .r_hold_or_done
+    CMP #$07
+    BEQ .l_hold_or_done
+    CMP #$03
+    BEQ .mash_tail
+    JMP .strip_reset
+.tap_R:
+    JMP lr_R
+.tap_L:
+    JMP lr_L
+.r_hold_or_done:
+    LDA.l !W+12
+    CMP #8
+    BCC +
+    JMP .strip_reset          ; pulse finished and R is up
++   JMP lr_R
+.l_hold_or_done:
+    LDA.l !W+12
+    CMP #8
+    BCC +
+    JMP .strip_reset
++   JMP lr_L
+.mash_tail:
+    LDA.l !W+12
+    CMP #16                   ; keep auto-mash going long enough for frenzy to start
+    BCC +
+    JMP .strip_reset
++   JMP lr_mash
+
 .lonly:
     LDA.l !W+13
     CMP #$05
-    BEQ .cancel               ; dropped R during commit: no fire, no leftover L shortcut
+    BNE +
+    JMP .cancel               ; dropped R during commit: no fire, no leftover L shortcut
++
     CMP #$06
-    BEQ .strip
-    CMP #$08
-    BEQ .strip
-    CMP #$09
-    BEQ .strip
-    CMP #$03
+    BNE +
+    JMP .strip
++   CMP #$08
+    BNE +
+    JMP .strip
++   CMP #$09
+    BNE +
+    JMP .strip
++   CMP #$04                  ; R pulse already running: do not also start L
+    BNE +
+    JMP .strip
++   CMP #$03
     BEQ .do_L                 ; Hornisse mash already running
+    CMP #$07
+    BEQ .do_L                 ; L pulse already running
     CMP #$02
     BEQ .ldeb_tick
     LDA #$02
@@ -429,7 +487,8 @@ lr_sc:
     INC
     STA.l !W+12
     CMP #$03                  ; ~3-frame chord debounce so a sloppy L+R does not fire L first
-    BCC .strip
+    BCS .do_L
+    JMP .strip
 .do_L:
     JMP lr_L
 
@@ -438,11 +497,22 @@ lr_sc:
     CMP #$05
     BEQ .cancel
     CMP #$06
-    BEQ .strip
-    CMP #$08
-    BEQ .strip
-    CMP #$09
-    BEQ .strip
+    BNE +
+    JMP .strip
++   CMP #$08
+    BNE +
+    JMP .strip
++   CMP #$09
+    BNE +
+    JMP .strip
++   CMP #$07
+    BNE +
+    JMP .strip
++   CMP #$03
+    BNE +
+    JMP .strip
++   CMP #$04
+    BEQ .do_R
     CMP #$01
     BEQ .rdeb_tick
     LDA #$01
@@ -455,7 +525,9 @@ lr_sc:
     INC
     STA.l !W+12
     CMP #$03
-    BCC .strip
+    BCS .do_R
+    JMP .strip
+.do_R:
     JMP lr_R
 
 .cancel:
@@ -474,12 +546,21 @@ lr_sc:
     PLP
     RTL
 
-lr_R:                     ; R -> A+B
-    LDA #$01
-    STA.l !W+13
+; R -> A+B, held for at least 8 frames even if the shoulder is already up.
+lr_R:
+    LDA.l !W+13
+    CMP #$04
+    BEQ +
     LDA #$00
     STA.l !W+12
-    LDA $0082
+    LDA #$04
+    STA.l !W+13
++   LDA.l !W+12
+    CMP #8
+    BCS +
+    INC
+    STA.l !W+12
++   LDA $0082
     ORA #$80              ; B
     STA $0082
     LDA $0083
@@ -493,11 +574,19 @@ lr_L:
     LDA $1430
     CMP #$01
     BEQ lr_mash           ; Hornisse: mash B
-    LDA #$02
-    STA.l !W+13
+    LDA.l !W+13
+    CMP #$07
+    BEQ +
     LDA #$00
     STA.l !W+12
-    LDA $0082
+    LDA #$07
+    STA.l !W+13
++   LDA.l !W+12
+    CMP #8
+    BCS +
+    INC
+    STA.l !W+12
++   LDA $0082
     ORA #$C0              ; B+Y
     STA $0082
     LDA $0083
@@ -506,6 +595,9 @@ lr_L:
     PLP
     RTL
 
+; Hornisse mash: same 2-on / 4-off pattern (~10 taps/s), but !W+12 is a
+; total-frame count (no wrap) so a short L tap can keep auto-mashing after
+; release. B is down when (count % 6) <= 1, which matches the old wrap cycle.
 lr_mash:
     LDA.l !W+13
     CMP #$03
@@ -517,12 +609,12 @@ lr_mash:
     LDA.l !W+12
     INC
     STA.l !W+12
-    CMP #$06
-    BCC +
-    LDA #$00
-    STA.l !W+12
-+   LDA.l !W+12
-    CMP #$02              ; frames 0-1: B down; 2-5: up (~10 taps/s)
+    SEC
+.mod6:
+    SBC #$06
+    BCS .mod6
+    ADC #$06              ; A = count % 6
+    CMP #$02              ; 0-1: B down; 2-5: up
     BCS +
     LDA $0082
     ORA #$80

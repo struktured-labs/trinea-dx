@@ -54,7 +54,7 @@ When **Shortcuts** is On in Configuration (the default), shoulder buttons synthe
 | Sara | B+Y (Star fall) | A+B (Homing flame) | hold L+R ~0.5s (Dragon Fire) |
 | Ryo | B+Y (Wall of fire) | A+B (Bombs) | hold L+R ~0.5s (Shadow clones) |
 
-Hold L/R (or both) in the field or a stage. L+R waits about half a second (30 joy/NMI frames, not shortened by Turbo) then fires the rotate special directly: no synthetic D-pad 360. Releasing either shoulder before that window cancels; the leftover shoulder does not fire L or R. The special uses the facing from the moment L+R went down (Sara Dragon Fire no longer turns to north because a fake spin ended on Up). Manual rotate-then-button input is unchanged.
+Hold L/R (or both) in the field or a stage. A brief tap of L or R still fires its shortcut (the injected combo is held long enough for the game to see it after the shoulder comes up). L+R waits about half a second (30 joy/NMI frames, not shortened by Turbo) then fires the rotate special directly: no synthetic D-pad 360. Releasing either shoulder before that window cancels; the leftover shoulder does not fire L or R. The special uses the facing from the moment L+R went down (Sara Dragon Fire no longer turns to north because a fake spin ended on Up). Manual rotate-then-button input is unchanged.
 
 ## DX options (Configuration menu)
 Turbo, Fast foes, Hero Speed, Rumble, and Shortcuts are toggled in the **Configuration** menu (title OPTIONS, or Select on the title). The old field L+R+button hotkeys are retired. Settings stay in battery SRAM ($30:6300 opts, $30:6304 Shortcuts); defaults are off, except rumble (on until turned off) and Shortcuts (on until turned off). Old saves and blank SRAM leave Shortcuts on.

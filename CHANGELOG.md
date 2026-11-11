@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fixed: a brief tap of L or R sometimes did nothing, because the 3-frame L+R chord window dropped the press if the shoulder came up before the shortcut committed, and even a slightly longer tap could release the synthetic buttons too soon. A quick L or R now always fires once: if you release during that window the move still starts, and the injected combo is held for 8 frames (Hornisse L keeps its auto-mash buildup for a short tail after release). Held L/R still wait those 3 frames so a sloppy L+R does not fire L or R first. L+R timing is unchanged (0.5s commit, cancel on early release, facing at press, gold once). Shortcuts Off still disables all of this.
+
 ## v1.2.0 (2026-11-10)
 - Fixed: moving the title cursor (Up/Down/Left/Right) did not reset the vanilla 600-frame attract idle ($7E1498). Navigating toward OPTIONS near that ~10s timeout could start the demo; activity now restarts the timer. Genuine idle attract is unchanged.
 - Title menu: LOAD GAME / NEW GAME / OPTIONS (was CONTINUE/START); Start on OPTIONS opens Configuration.
