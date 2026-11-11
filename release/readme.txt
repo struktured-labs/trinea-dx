@@ -1,5 +1,5 @@
 ===============================================================================
-                    TRINEA DX v1.2.0 - English Translation + DX
+                    TRINEA DX v1.2.1 - English Translation + DX
                           by struktured labs
 ===============================================================================
 
@@ -7,11 +7,11 @@ Game:          Trinea
 Platform:      Super Nintendo / Super Famicom
 Genre:         Action RPG
 Original:      Yanoman / Japan Art Media (JAM), 1993 (Japan only)
-Patch version: 1.2.0
+Patch version: 1.2.1
 Release date:  2026-11-10
 Status:        Complete
 Project:       Trinea DX (enhancement project; v1.0 = English translation)
-Source:        https://github.com/struktured/trinea-dx
+Source:        https://github.com/struktured-labs/trinea-dx
 
 -------------------------------------------------------------------------------
  CONTENTS
@@ -38,7 +38,7 @@ the entire game into English:
  - The character select screen, shop descriptions and messages, and the
    money label.
  - A new variable-width dialogue font and additions to the 8x8 small font.
- - DX extras (v1.2.0): less of the original game's slowdown in some
+ - DX extras (v1.2.1): less of the original game's slowdown in some
    scenes; a title LOAD GAME / NEW GAME / OPTIONS menu; a Configuration
    menu (Turbo, Fast foes, Hero Speed, Rumble, Shortcuts, plus a nested
    Sound Test); per-hero L/R move shortcuts (optional; off restores the
@@ -65,9 +65,9 @@ Apply the patch to this ROM (No-Intro), headerless:
 After patching:
 
   Size:   4,194,304 bytes (32 Mbit)
-  CRC32:  A6D2ECBE
-  MD5:    979E07E0487F9D1AC4E7443B3D67BFD5
-  SHA-1:  AE8F921CC8066728DB717DF941C2603FD6B7BAFF
+  CRC32:  F5D86F59
+  MD5:    3ED9D0651F51C52E63363AA4D4B7A075
+  SHA-1:  9FCA867082EDD1EAA63F875B08658136FF80E5E6
 
 -------------------------------------------------------------------------------
  3. HOW TO APPLY THE PATCH
@@ -75,7 +75,7 @@ After patching:
  1. Make a backup copy of your ROM and check it against the hashes above.
     If your file is 2,097,664 bytes, it has a copier header. Remove the
     header first.
- 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.2.0].ips" with an IPS
+ 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.2.1].ips" with an IPS
     patcher, for example:
       - Floating IPS (Flips)   https://github.com/Alcaro/Flips
       - ROM Patcher JS (web)   https://www.marcrobledo.com/RomPatcher.js/
@@ -148,7 +148,7 @@ soft-patching. The patched game is a plain 32 Mbit HiROM with no special chips.
  - The game's existing English graphics (title, LIFE/ATTACK/SPEED, staff
    credits) are unchanged.
 
-Bug reports: https://github.com/struktured/trinea-dx/issues
+Bug reports: https://github.com/struktured-labs/trinea-dx/issues
 
 -------------------------------------------------------------------------------
  6. CREDITS
@@ -187,6 +187,12 @@ holders.
 -------------------------------------------------------------------------------
  8. CHANGELOG
 -------------------------------------------------------------------------------
+ v1.2.1 (2026-11-10)
+   - Fixed: a brief tap of L or R sometimes did nothing (the 3-frame
+     L+R chord window dropped a press that came up before the shortcut
+     committed). A quick L or R now always fires once. Held L/R still
+     wait those 3 frames so a sloppy L+R does not fire L or R first.
+     L+R timing is unchanged.
  v1.2.0 (2026-11-10)
    - Title menu is now LOAD GAME / NEW GAME / OPTIONS. Start on OPTIONS
      opens Configuration (Turbo, Fast foes, Hero Speed, Rumble,

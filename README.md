@@ -8,7 +8,7 @@ are planned next (see [Roadmap](#roadmap)).
 
 This repository has the **source**: the English script, the English fonts, the 65816 patches and the Python build
 tools. It also has a ready-made IPS patch in [`release/`](release/) and on the
-[Releases page](https://github.com/struktured/trinea-dx/releases). **No ROM data is included.** Everything derived
+[Releases page](https://github.com/struktured-labs/trinea-dx/releases). **No ROM data is included.** Everything derived
 from the game is regenerated at build time from your own legally dumped cartridge.
 
 | | |
@@ -57,7 +57,7 @@ Requirements: Linux, macOS or WSL with `bash`, `python3` (plus `numpy` and `Pill
 and a C/C++ compiler. The compiler is only needed the first time, to build the assembler and patcher.
 
 ```sh
-git clone https://github.com/struktured/trinea-dx.git
+git clone https://github.com/struktured-labs/trinea-dx.git
 cd trinea-dx
 pip install numpy pillow          # if not already installed
 tools/build.sh "/path/to/Trinea (Japan).sfc"
@@ -121,9 +121,10 @@ Editing the translation:
 
 ## Roadmap
 
-- **v1.2.0 (latest release):** title LOAD GAME / NEW GAME / OPTIONS; Configuration menu hosts Turbo / Fast foes / Hero Speed / Rumble / Shortcuts; field L+R+button DX hotkeys retired; L/R are per-hero move shortcuts (can be turned off); L+R fires the rotate special after ~0.5s and keeps the facing from press; title cursor movement resets the attract timer ([#16](https://github.com/struktured/trinea-dx/issues/16)).
-- **v1.1.3:** Play Level Easy fixed (Easy now deals Normal damage and takes half damage, min 1; Hard's doubled damage capped at 255; [#13](https://github.com/struktured/trinea-dx/issues/13)), hero speed now works for Ryo ([#15](https://github.com/struktured/trinea-dx/issues/15)), and the overlay says Ryo's clone spin is fast.
-- **v1.1.2:** fixes the Select controls overlay text being shifted/wavy in stages with BG3 scroll HDMA (e.g. Neo Edo, [#12](https://github.com/struktured/trinea-dx/issues/12)).
+- **v1.2.1 (latest release):** brief L/R taps (1–5 frames) now always fire once; a held L or R still waits 3 frames so L+R never fires a single move first. Otherwise the same as v1.2.0.
+- **v1.2.0:** title LOAD GAME / NEW GAME / OPTIONS; Configuration menu hosts Turbo / Fast foes / Hero Speed / Rumble / Shortcuts; field L+R+button DX hotkeys retired; L/R are per-hero move shortcuts (can be turned off); L+R fires the rotate special after ~0.5s and keeps the facing from press; title cursor movement resets the attract timer ([#16](https://github.com/struktured-labs/trinea-dx/issues/16)).
+- **v1.1.3:** Play Level Easy fixed (Easy now deals Normal damage and takes half damage, min 1; Hard's doubled damage capped at 255; [#13](https://github.com/struktured-labs/trinea-dx/issues/13)), hero speed now works for Ryo ([#15](https://github.com/struktured-labs/trinea-dx/issues/15)), and the overlay says Ryo's clone spin is fast.
+- **v1.1.2:** fixes the Select controls overlay text being shifted/wavy in stages with BG3 scroll HDMA (e.g. Neo Edo, [#12](https://github.com/struktured-labs/trinea-dx/issues/12)).
 - **v1.1.1:** removed the L+R+Select dialogue-skip toggle; Start always skips dialogue.
 - **v1.1:** Trinea DX: speed improvements, L+R+button option toggles, rumble, Select controls overlay,
   Start skips dialogue, final-boss freeze fix, "Graph" spelling, opening-line fix. See [CHANGELOG.md](CHANGELOG.md).
@@ -131,7 +132,7 @@ Editing the translation:
   through them, e.g. after a boss victory). 
 - **v1.0:** complete English translation.
 - **Planned: 2-player co-op.** A two-player simultaneous mode.
-- Bug-fix releases based on playtest reports. Please open an [issue](https://github.com/struktured/trinea-dx/issues)
+- Bug-fix releases based on playtest reports. Please open an [issue](https://github.com/struktured-labs/trinea-dx/issues)
   with a screenshot and the message location.
 
 ## Credits
