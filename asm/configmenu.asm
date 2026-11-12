@@ -1,5 +1,5 @@
 ; Issue #16 step 3 — Configuration menu DX rows.
-; Rows: Exit, Play Level, Sound Mode, Turbo, Fast foes, Hero Speed, Rumble, Shortcuts, Sound Test.
+; Rows: Exit, Play Level, Sound Mode, Game Speed, Enemy Speed, Hero Speed, Rumble, L/R Shortcuts, Sound Test.
 ; Sound Effects + Music Play nested under Sound Test (A toggles SFX↔BGM).
 ; Opts via getopt/setopt (FE:0200). Code in EB; thin D9 stubs for JSR $9A22/$9A9B/$922F.
 
@@ -70,35 +70,12 @@ cfg_jsr_refresh:            ; redraw via vanilla $922F (colors+draw+cursor sprit
     RTL
 cfg_str_spd_normal: db "Normal$"           ; Game Speed values (no free string ids:
 cfg_str_spd_turbo:  db "Turbo $"           ;  $47-$4F music names, $53/$54 copyright)
-; Game Speed value at $036C: Turbo bit (opts bit0) clear -> "Normal", set -> "Turbo".
-; Prints from a direct pointer by entering $9A22's loop at $9A4D with its exact frame
-; (PHP/PHB/PHX/PHY pushed, $00 = palette bits, DB = $D9, X = tile offset, Y = string).
-cfg_print_speed:
-    PHP
-    SEP #$20
-    REP #$10
-    JSL getopt
-    LDY.w #cfg_str_spd_normal
-    AND #$01
-    BEQ +
-    LDY.w #cfg_str_spd_turbo
-+   LDX #$036C
+; Value words without string ids (Game Speed, Enemy Speed, Hero Speed): the selectors
+; live in EB (cfg_print_speed/foes/hero) and print through cfg_print_ptr_l, which enters
+; $9A22's loop at $9A4D with its exact frame (PHP/PHB/PHX/PHY pushed, $00 = palette bits,
+; DB = $D9, X = tile offset, Y = string). All value words are 6 wide so toggles leave no glyphs.
+cfg_print_ptr_l:            ; JSL entry: X = tile, Y = string ptr (bank D9), 16-bit X/Y
     JSR cfg_print_ptr
-    PLP
-    RTL
-; Enemy Speed value at $03AC: Fast foes bit (opts bit3) clear -> "Normal", set -> "Fast".
-cfg_print_foes:
-    PHP
-    SEP #$20
-    REP #$10
-    JSL getopt
-    LDY.w #cfg_str_spd_normal
-    AND #$08
-    BEQ +
-    LDY.w #cfg_str_fast     ; "Fast  " (6 wide, clears "Normal")
-+   LDX #$03AC
-    JSR cfg_print_ptr
-    PLP
     RTL
 cfg_print_ptr:              ; X = tile, Y = string ptr (bank D9), color 3
     PHP
@@ -297,10 +274,7 @@ cfg_draw:
     LDX #$03CA
     LDY $16B5
     JSL cfg_jsr_print
-    JSL cfg_val_hero
-    LDX #$03EC
-    LDY #$0003
-    JSL cfg_jsr_print
+    JSL cfg_print_hero      ; "Normal" / "Fast" / "Faster" (eadmaster, #18)
     ; Rumble
     LDA #$50
     LDX #$040A
@@ -361,20 +335,59 @@ cfg_val_turbo:
     ADC #$40
     RTL
 
-cfg_val_hero:
+; Game Speed value at $036C: Turbo bit (opts bit0) clear -> "Normal", set -> "Turbo".
+cfg_print_speed:
+    PHP
+    SEP #$20
+    REP #$10
+    JSL getopt
+    LDY.w #cfg_str_spd_normal&$FFFF
+    AND #$01
+    BEQ +
+    LDY.w #cfg_str_spd_turbo&$FFFF
++   LDX #$036C
+    JSL cfg_print_ptr_l
+    PLP
+    RTL
+
+; Enemy Speed value at $03AC: Fast foes bit (opts bit3) clear -> "Normal", set -> "Fast".
+cfg_print_foes:
+    PHP
+    SEP #$20
+    REP #$10
+    JSL getopt
+    LDY.w #cfg_str_spd_normal&$FFFF
+    AND #$08
+    BEQ +
+    LDY.w #cfg_str_fast&$FFFF     ; "Fast  " (6 wide, clears "Normal")
++   LDX #$03AC
+    JSL cfg_print_ptr_l
+    PLP
+    RTL
+
+; Hero Speed value at $03EC: opts bits 1-2 = 0 -> "Normal" (was "Off"; eadmaster, #18),
+; 1 -> "Fast  ", 2 (or 3) -> "Faster". Shared "Off" id $40 stays for Rumble/L/R Shortcuts.
+cfg_print_hero:
+    PHP
+    SEP #$20
+    REP #$10
     JSL getopt
     LSR
     AND #$03
-    BEQ .off
     CMP #$01
+    BCC .normal
     BEQ .fast
-    LDA #$43              ; Faster
-    RTL
-.off:
-    LDA #$40
-    RTL
+    LDY.w #cfg_str_faster&$FFFF
+    BRA .print
 .fast:
-    LDA #$42
+    LDY.w #cfg_str_fast&$FFFF
+    BRA .print
+.normal:
+    LDY.w #cfg_str_spd_normal&$FFFF
+.print:
+    LDX #$03EC
+    JSL cfg_print_ptr_l
+    PLP
     RTL
 
 cfg_val_rumble:
