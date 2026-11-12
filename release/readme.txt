@@ -1,5 +1,5 @@
 ===============================================================================
-                    TRINEA DX v1.2.1 - English Translation + DX
+                    TRINEA DX v1.2.2 - English Translation + DX
                           by struktured labs
 ===============================================================================
 
@@ -7,8 +7,8 @@ Game:          Trinea
 Platform:      Super Nintendo / Super Famicom
 Genre:         Action RPG
 Original:      Yanoman / Japan Art Media (JAM), 1993 (Japan only)
-Patch version: 1.2.1
-Release date:  2026-11-10
+Patch version: 1.2.2
+Release date:  2026-11-12
 Status:        Complete
 Project:       Trinea DX (enhancement project; v1.0 = English translation)
 Source:        https://github.com/struktured-labs/trinea-dx
@@ -38,9 +38,9 @@ the entire game into English:
  - The character select screen, shop descriptions and messages, and the
    money label.
  - A new variable-width dialogue font and additions to the 8x8 small font.
- - DX extras (v1.2.1): less of the original game's slowdown in some
+ - DX extras (v1.2.2): less of the original game's slowdown in some
    scenes; a title LOAD GAME / NEW GAME / OPTIONS menu; a Configuration
-   menu (Turbo, Fast foes, Hero Speed, Rumble, Shortcuts, plus a nested
+   menu (Game Speed, Enemy Speed, Hero Speed, Rumble, L/R Shortcuts, plus a nested
    Sound Test); per-hero L/R move shortcuts (optional; off restores the
    original shoulder buttons); RumbleShock rumble; a Select controls
    overlay; Start to skip dialogue; and a boot splash. Every toggle can
@@ -48,8 +48,8 @@ the entire game into English:
    Start skips dialogue only when you press it.
  - The ROM is expanded to 32 Mbit (4 MB HiROM) with a valid checksum.
 
-This build was hardware-tested on MiSTer. Earlier versions were played
-through on MiSTer.
+This build was smoke-tested on MiSTer on 2026-11-12. v1.2.1 and earlier
+were hardware-tested on MiSTer.
 
 -------------------------------------------------------------------------------
  2. ROM INFORMATION
@@ -65,9 +65,9 @@ Apply the patch to this ROM (No-Intro), headerless:
 After patching:
 
   Size:   4,194,304 bytes (32 Mbit)
-  CRC32:  F5D86F59
-  MD5:    3ED9D0651F51C52E63363AA4D4B7A075
-  SHA-1:  9FCA867082EDD1EAA63F875B08658136FF80E5E6
+  CRC32:  D4982588
+  MD5:    CE0C954D52F57214B425A9A9F74E6EED
+  SHA-1:  1679EA7E02FAD41AE87622A8E82C904EAA66CF47
 
 -------------------------------------------------------------------------------
  3. HOW TO APPLY THE PATCH
@@ -75,7 +75,7 @@ After patching:
  1. Make a backup copy of your ROM and check it against the hashes above.
     If your file is 2,097,664 bytes, it has a copier header. Remove the
     header first.
- 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.2.1].ips" with an IPS
+ 2. Apply "Trinea (Japan) [T-En DX by struktured labs v1.2.2].ips" with an IPS
     patcher, for example:
       - Floating IPS (Flips)   https://github.com/Alcaro/Flips
       - ROM Patcher JS (web)   https://www.marcrobledo.com/RomPatcher.js/
@@ -106,18 +106,21 @@ soft-patching. The patched game is a plain 32 Mbit HiROM with no special chips.
  idle timer, so you can walk down to OPTIONS without the demo starting.
 
  Configuration (saved in SRAM):
-   Turbo
-   Fast foes
-   Hero Speed   Works for any hero, but it is mainly there to bring
-                Sara up to the speed she had in the Game Boy version.
-   Rumble       On by default.
-   Shortcuts    On by default. Off disables all DX L/R hero shortcuts
-                (single L, single R, and L+R) and restores original
-                shoulder input: no injected specials and no gold spent.
-   Sound Test   Nested under Configuration.
+   Game Speed     Normal / Turbo
+   Enemy Speed    Normal / Fast
+   Hero Speed     Normal / Fast / Faster. Works for any hero, but it
+                  is mainly there to bring Sara up to the speed she
+                  had in the Game Boy version.
+   Rumble         On by default (Off / On).
+   L/R Shortcuts  On by default. Off disables all DX L/R hero
+                  shortcuts (single L, single R, and L+R) and
+                  restores original shoulder input: no injected
+                  specials and no gold spent.
+   Sound Test     Nested under Configuration.
+  The option cycles and saved settings are the same as v1.2.1.
  The old field L+R+button DX option hotkeys are retired.
 
- L/R shortcuts (when Shortcuts is On):
+ L/R shortcuts (when L/R Shortcuts is On):
    L / R fire each hero's specials:
      Hornisse: L = mash Sword Frenzy (original buildup, not instant),
                R = morning star
@@ -187,6 +190,16 @@ holders.
 -------------------------------------------------------------------------------
  8. CHANGELOG
 -------------------------------------------------------------------------------
+ v1.2.2 (2026-11-12)
+   - Configuration menu: about 1px of extra space between lines
+     (suggested by eadmaster, issue #18). Letters are the same as
+     v1.2.1; the list is moved up 2px so it still fits the window.
+   - Labels renamed for consistency (also eadmaster, issue #18):
+     Turbo is now Game Speed (Normal / Turbo); Fast foes is now
+     Enemy Speed (Normal / Fast); Shortcuts is now L/R Shortcuts;
+     Hero Speed's default value is Normal instead of Off (Fast /
+     Faster unchanged). Option cycles and saved settings are
+     unchanged. Rumble and L/R Shortcuts still say Off / On.
  v1.2.1 (2026-11-10)
    - Fixed: a brief tap of L or R sometimes did nothing (the 3-frame
      L+R chord window dropped a press that came up before the shortcut

@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.2 (2026-11-12)
+- Configuration menu: about 1px of extra space between lines (HDMA line spacing), suggested by eadmaster in issue #18. The letters are the same as v1.2.1; the list is moved up 2px so it still fits the window.
+- Labels renamed for consistency (also eadmaster, #18): Turbo is now Game Speed (Normal / Turbo); Fast foes is now Enemy Speed (Normal / Fast); Shortcuts is now L/R Shortcuts; Hero Speed's default value reads Normal instead of Off (Fast / Faster unchanged). Option cycles and SRAM layout are unchanged, so existing saves keep their settings. Rumble and L/R Shortcuts still say Off / On.
+- Translation text unchanged from v1.1.3. Smoke-tested on MiSTer on 2026-11-12; v1.2.1 and earlier were also hardware-tested on MiSTer.
+
 ## v1.2.1 (2026-11-10)
 - Fixed: a brief tap of L or R sometimes did nothing, because the 3-frame L+R chord window dropped the press if the shoulder came up before the shortcut committed, and even a slightly longer tap could release the synthetic buttons too soon. A quick L or R now always fires once: if you release during that window the move still starts, and the injected combo is held for 8 frames (Hornisse L keeps its auto-mash buildup for a short tail after release). Held L/R still wait those 3 frames so a sloppy L+R does not fire L or R first. L+R timing is unchanged (0.5s commit, cancel on early release, facing at press, gold once). Shortcuts Off still disables all of this.
 
