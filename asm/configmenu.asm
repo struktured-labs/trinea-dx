@@ -46,7 +46,7 @@ org $D990BA
 ; D9 stubs so EB can call bank-D9 subroutines
 org $D9B010
 cfg_str_turbo:      db "Game Speed$"       ; was "Turbo" (eadmaster, #18)
-cfg_str_fastfoes:   db "Fast foes$"
+cfg_str_fastfoes:   db "Enemy Speed$"      ; was "Fast foes" (eadmaster, #18)
 cfg_str_herospeed:  db "Hero Speed$"
 cfg_str_rumble:     db "Rumble$"
 cfg_str_shortcuts:  db "L/R Shortcuts$"    ; was "Shortcuts" (eadmaster, #18)
@@ -86,6 +86,20 @@ cfg_print_speed:
     JSR cfg_print_ptr
     PLP
     RTL
+; Enemy Speed value at $03AC: Fast foes bit (opts bit3) clear -> "Normal", set -> "Fast".
+cfg_print_foes:
+    PHP
+    SEP #$20
+    REP #$10
+    JSL getopt
+    LDY.w #cfg_str_spd_normal
+    AND #$08
+    BEQ +
+    LDY.w #cfg_str_fast     ; "Fast  " (6 wide, clears "Normal")
++   LDX #$03AC
+    JSR cfg_print_ptr
+    PLP
+    RTL
 cfg_print_ptr:              ; X = tile, Y = string ptr (bank D9), color 3
     PHP
     PHB
@@ -107,6 +121,7 @@ cfg_exit_stub:
     JSR $9320               ; vanilla fade-out (spacing stays during the fade)
     JSL cfg_hdma_off
     RTS
+assert pc() <= $D9B100              ; zero-filled free run ends at $D9B0FF
 
 ; String ID pointer table: id $30..$34 labels, $40..$45 values
 org $D99F6E                 ; id $30..$32 (replace SE/MP/blank labels)
@@ -276,10 +291,7 @@ cfg_draw:
     LDX #$038A
     LDY $16B3
     JSL cfg_jsr_print
-    JSL cfg_val_foes
-    LDX #$03AC
-    LDY #$0003
-    JSL cfg_jsr_print
+    JSL cfg_print_foes      ; "Normal" / "Fast"
     ; Hero Speed
     LDA #$32
     LDX #$03CA
@@ -347,15 +359,6 @@ cfg_val_turbo:
     AND #$01
     CLC
     ADC #$40
-    RTL
-
-cfg_val_foes:
-    JSL getopt
-    AND #$08
-    BEQ +
-    LDA #$41
-    RTL
-+   LDA #$40
     RTL
 
 cfg_val_hero:
